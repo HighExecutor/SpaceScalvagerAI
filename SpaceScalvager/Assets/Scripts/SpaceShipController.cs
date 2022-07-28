@@ -1,7 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Quaternion = UnityEngine.Quaternion;
+using Vector2 = UnityEngine.Vector2;
+using Vector3 = UnityEngine.Vector3;
 
 public class SpaceShipController : MonoBehaviour
 {
@@ -12,6 +16,14 @@ public class SpaceShipController : MonoBehaviour
     private Rigidbody rb;
     private ParticleSystem parts;
     private Transform body;
+    public GameObject aimPosition;
+    public GameObject[] lasers;
+    public TrailRenderer railgunTrail;
+    public float shootCooldown;
+    private float curShootCooldown;
+    public float shootRange;
+    private bool canShoot;
+    public ParticleSystem shootEffect;
 
 
     // Start is called before the first frame update
@@ -20,12 +32,28 @@ public class SpaceShipController : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         parts = GetComponentInChildren<ParticleSystem>();
         body = transform.GetChild(0);
+        curShootCooldown = 0.0f;
+        canShoot = true;
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
         Move();
+        UpdateCooldown();
+    }
+
+    private void UpdateCooldown()
+    {
+        if (curShootCooldown > 0)
+        {
+            curShootCooldown -= Time.fixedDeltaTime;
+            if (curShootCooldown <= 0)
+            {
+                canShoot = true;
+                curShootCooldown = 0.0f;
+            }
+        }
     }
 
     private void Move()
@@ -123,5 +151,43 @@ public class SpaceShipController : MonoBehaviour
 
     void OnShoot()
     {
+        if (canShoot)
+        {
+            Vector3 direction = transform.forward.normalized;
+            float range = shootRange;
+            if (Physics.Raycast(aimPosition.transform.position, direction, out RaycastHit hit, shootRange))
+            {
+                Debug.Log("Hit distance" + hit.distance);
+                range = Vector3.Distance(aimPosition.transform.position, hit.point);
+                ParticleSystem hitEffect = Instantiate(shootEffect, hit.point, Quaternion.identity);
+                Destroy(hitEffect.gameObject, 0.5f);
+            }
+            for (int l = 0; l < lasers.Length; l++)
+            {
+                TrailRenderer trail = Instantiate(railgunTrail, lasers[l].transform);
+                StartCoroutine(SpawnTrail(trail, range, shootRange));
+
+            }
+            canShoot = false;
+            curShootCooldown = shootCooldown;
+        }
     }
+
+    IEnumerator SpawnTrail(TrailRenderer trail, float range, float maxRange)
+    {
+        float time = 0f;
+        Vector3 startPosition = trail.transform.position;
+        Vector3 endPoint = startPosition + trail.transform.up.normalized * range;
+        float rangeRate = range / maxRange;
+        while (time < rangeRate)
+        {
+            trail.transform.position = Vector3.Lerp(startPosition, endPoint, time / rangeRate);
+            time += Time.fixedDeltaTime / trail.time;
+            yield return null;
+        }
+        trail.transform.position = endPoint;
+        Destroy(trail.gameObject, trail.time);
+
+    }
+
 }
