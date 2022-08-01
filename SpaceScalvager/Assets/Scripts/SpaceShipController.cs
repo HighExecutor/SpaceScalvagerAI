@@ -161,6 +161,11 @@ public class SpaceShipController : MonoBehaviour
                 range = Vector3.Distance(aimPosition.transform.position, hit.point);
                 ParticleSystem hitEffect = Instantiate(shootEffect, hit.point, Quaternion.identity);
                 Destroy(hitEffect.gameObject, 0.5f);
+                if (hit.collider.CompareTag("Meteor"))
+                {
+                    MeteorScript meteor = hit.collider.GetComponent<MeteorScript>();
+                    meteor.TakeHit();
+                }
             }
             for (int l = 0; l < lasers.Length; l++)
             {
