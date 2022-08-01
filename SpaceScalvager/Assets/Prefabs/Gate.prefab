@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 239883201254279046}
   - component: {fileID: 1630264182388799411}
   - component: {fileID: 5422657369635110076}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Pipe
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2101,7 +2101,7 @@ GameObject:
   - component: {fileID: 2469560715090551080}
   - component: {fileID: 3968793162642997177}
   - component: {fileID: 1854497493560291227}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2440,7 +2440,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4461404720202008377}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Gate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2481,7 +2481,7 @@ GameObject:
   - component: {fileID: 3259095251173305927}
   - component: {fileID: 4329497421059843861}
   - component: {fileID: 5112039976251652361}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Torus (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6970,7 +6970,7 @@ GameObject:
   - component: {fileID: 186746876169180463}
   - component: {fileID: 4615754437812554959}
   - component: {fileID: 991928957985453467}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Torus
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11459,7 +11459,7 @@ GameObject:
   - component: {fileID: 7333249690882530096}
   - component: {fileID: 6517986444955922885}
   - component: {fileID: 906075314973953611}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Pipe (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

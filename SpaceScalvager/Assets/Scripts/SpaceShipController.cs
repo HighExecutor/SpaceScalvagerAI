@@ -24,6 +24,10 @@ public class SpaceShipController : MonoBehaviour
     public float shootRange;
     private bool canShoot;
     public ParticleSystem shootEffect;
+    public CargoUIScript cargoUI;
+
+    private float curMinerals;
+    public float maxMinerals;
 
 
     // Start is called before the first frame update
@@ -34,6 +38,9 @@ public class SpaceShipController : MonoBehaviour
         body = transform.GetChild(0);
         curShootCooldown = 0.0f;
         canShoot = true;
+        curMinerals = 0.0f;
+        cargoUI.SetMaxCargo((int)maxMinerals);
+        cargoUI.SetText(0.0f);
     }
 
     // Update is called once per frame
@@ -155,7 +162,8 @@ public class SpaceShipController : MonoBehaviour
         {
             Vector3 direction = transform.forward.normalized;
             float range = shootRange;
-            if (Physics.Raycast(aimPosition.transform.position, direction, out RaycastHit hit, shootRange))
+            LayerMask mask = LayerMask.GetMask("Objects");
+            if (Physics.Raycast(aimPosition.transform.position, direction, out RaycastHit hit, shootRange, mask))
             {
                 Debug.Log("Hit distance" + hit.distance);
                 range = Vector3.Distance(aimPosition.transform.position, hit.point);
@@ -195,4 +203,12 @@ public class SpaceShipController : MonoBehaviour
 
     }
 
+    public void TakeMineral(float amount)
+    {
+        curMinerals = Mathf.Min(maxMinerals, curMinerals + amount);
+        cargoUI.SetCargo(curMinerals);
+        cargoUI.SetText(curMinerals);
+        
+    }
+    
 }

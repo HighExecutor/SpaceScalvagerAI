@@ -10,11 +10,12 @@ public class SpaceManager : MonoBehaviour
     public GameObject meteorsObject;
     public GameObject mineralsObject;
     public GameObject mineralPrefab;
+    private SpaceShipController player;
     
     // Start is called before the first frame update
     void Start()
     {
-        
+        player = GetComponentInChildren<SpaceShipController>();
     }
 
     // Update is called once per frame
@@ -43,6 +44,8 @@ public class SpaceManager : MonoBehaviour
 
     public void MineralTaken(GameObject mineral)
     {
+        float amount = mineral.GetComponent<MineralScript>().amount;
+        player.TakeMineral(amount);
         Destroy(mineral.gameObject);
     }
 

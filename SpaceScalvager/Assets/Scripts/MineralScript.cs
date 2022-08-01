@@ -6,6 +6,7 @@ using UnityEngine;
 public class MineralScript : MonoBehaviour
 {
     private SphereCollider col;
+    public float amount;
     
     // Start is called before the first frame update
     void Start()

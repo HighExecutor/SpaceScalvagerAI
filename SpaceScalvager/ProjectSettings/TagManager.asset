@@ -5,14 +5,15 @@ TagManager:
   serializedVersion: 2
   tags:
   - Meteor
+  - Mineral
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Objects
   - Water
   - UI
-  - 
+  - Triggers
   - 
   - 
   - 
