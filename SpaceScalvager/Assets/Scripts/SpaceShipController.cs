@@ -40,7 +40,7 @@ public class SpaceShipController : MonoBehaviour
         canShoot = true;
         curMinerals = 0.0f;
         cargoUI.SetMaxCargo((int)maxMinerals);
-        cargoUI.SetText(0.0f);
+        cargoUI.SetCargo(0.0f);
     }
 
     // Update is called once per frame
@@ -165,7 +165,6 @@ public class SpaceShipController : MonoBehaviour
             LayerMask mask = LayerMask.GetMask("Objects");
             if (Physics.Raycast(aimPosition.transform.position, direction, out RaycastHit hit, shootRange, mask))
             {
-                Debug.Log("Hit distance" + hit.distance);
                 range = Vector3.Distance(aimPosition.transform.position, hit.point);
                 ParticleSystem hitEffect = Instantiate(shootEffect, hit.point, Quaternion.identity);
                 Destroy(hitEffect.gameObject, 0.5f);
@@ -207,8 +206,13 @@ public class SpaceShipController : MonoBehaviour
     {
         curMinerals = Mathf.Min(maxMinerals, curMinerals + amount);
         cargoUI.SetCargo(curMinerals);
-        cargoUI.SetText(curMinerals);
         
+    }
+    
+    public void SellMinerals()
+    {
+        curMinerals = 0.0f;
+        cargoUI.SetCargo(0.0f);
     }
     
 }

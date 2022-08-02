@@ -18,6 +18,7 @@ public class CargoUIScript : MonoBehaviour
     public void SetCargo(float curCargo)
     {
         slider.value = curCargo;
+        SetText(curCargo);
     }
 
     public void SetText(float curCargo)
