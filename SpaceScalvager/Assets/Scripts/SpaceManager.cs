@@ -1,7 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
+using Object = UnityEngine.Object;
+using Random = UnityEngine.Random;
 
 public class SpaceManager : MonoBehaviour
 {
@@ -11,11 +15,13 @@ public class SpaceManager : MonoBehaviour
     public GameObject mineralsObject;
     public GameObject mineralPrefab;
     private SpaceShipController player;
+    private SphereCollider boundaryTrigger;
     
     // Start is called before the first frame update
     void Start()
     {
         player = GetComponentInChildren<SpaceShipController>();
+        boundaryTrigger = GetComponent<SphereCollider>();
     }
 
     // Update is called once per frame
@@ -49,4 +55,75 @@ public class SpaceManager : MonoBehaviour
         Destroy(mineral.gameObject);
     }
 
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            SpaceShipController player = other.GetComponent<SpaceShipController>();
+            player.OnEpisodeBegin();
+            MineralScript[] minerals = mineralsObject.GetComponentsInChildren<MineralScript>();
+            foreach (var m in minerals)
+            {
+                Destroy(m.gameObject);
+            }
+        }
+    }
+
+    public Dictionary<String, object> GetObservations()
+    {
+        Dictionary<String, object> result = new Dictionary<String, object>();
+        result["gate"] = GetComponentInChildren<GateScript>().transform.position - player.transform.position;
+        result["meteorsPos"] = meteorsPosition.transform.position - player.transform.position;
+
+        MeteorScript[] meteors = GetComponentsInChildren<MeteorScript>();
+        result["meteorsNumber"] = (float)meteors.Length;
+        List<Vector3> meteorsDists = new List<Vector3>();
+        if (meteors.Length > 0)
+        {
+            IEnumerable<Vector3> meteorsPositions = meteors.Select(x => x.transform.position);
+            IEnumerator<Vector3> meteorsDistances =
+                meteorsPositions.OrderByDescending(x => Vector3.Distance(x, player.transform.position)).GetEnumerator();
+            int m = Mathf.Min(3, meteors.Length);
+            while (m > 0)
+            {
+                Vector3 pos = meteorsDistances.Current;
+                meteorsDists.Add(pos - player.transform.position);
+                meteorsDistances.MoveNext();
+                m--;
+            }
+        }
+        result["meteorsDists"] = meteorsDists;
+        
+        MineralScript[] minerals = GetComponentsInChildren<MineralScript>();
+        result["mineralsNumber"] = (float)minerals.Length;
+        List<Vector3> mineralDists = new List<Vector3>();
+        if (minerals.Length > 0)
+        {
+            IEnumerable<Vector3> mineralsPositions = minerals.Select(x => x.transform.position);
+            IEnumerator<Vector3> mineralsDistances =
+                mineralsPositions.OrderByDescending(x => Vector3.Distance(x, player.transform.position))
+                    .GetEnumerator();
+            int m = Mathf.Min(3, minerals.Length);
+            while (m > 0)
+            {
+                Vector3 pos = mineralsDistances.Current;
+                mineralDists.Add(pos - player.transform.position);
+                mineralsDistances.MoveNext();
+                m--;
+            }
+        }
+
+        int n = 3 - minerals.Length;
+        if (n > 0)
+        {
+            while (n > 0)
+            {
+                mineralDists.Add(Vector3.zero);
+                n--;
+            }
+        }
+        result["mineralsDists"] = mineralDists;
+
+        return result;
+    }
 }

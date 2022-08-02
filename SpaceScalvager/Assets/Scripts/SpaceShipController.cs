@@ -1,13 +1,18 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
+using Unity.MLAgents;
+using Unity.MLAgents.Actuators;
+using Unity.MLAgents.Sensors;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Quaternion = UnityEngine.Quaternion;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
 
-public class SpaceShipController : MonoBehaviour
+public class SpaceShipController : Agent
 {
     public float velocity;
     public float angularVelocity;
@@ -25,9 +30,12 @@ public class SpaceShipController : MonoBehaviour
     private bool canShoot;
     public ParticleSystem shootEffect;
     public CargoUIScript cargoUI;
-
+    private SpaceManager spaceManager;
     private float curMinerals;
     public float maxMinerals;
+
+    private Vector3 startPosition;
+    private Quaternion startRotate;
 
 
     // Start is called before the first frame update
@@ -41,10 +49,12 @@ public class SpaceShipController : MonoBehaviour
         curMinerals = 0.0f;
         cargoUI.SetMaxCargo((int)maxMinerals);
         cargoUI.SetCargo(0.0f);
+        startPosition = transform.position;
+        startRotate = transform.rotation;
+        spaceManager = GetComponentInParent<SpaceManager>();
     }
 
-    // Update is called once per frame
-    void FixedUpdate()
+    void CustomFixedUpdate()
     {
         Move();
         UpdateCooldown();
@@ -145,7 +155,73 @@ public class SpaceShipController : MonoBehaviour
             transform.rotation = Quaternion.Euler(vertAngle, horAngle, diagAngle);
         }
     }
-    
+
+    public override void OnActionReceived(ActionBuffers actionBuffers)
+    {
+        float x = actionBuffers.ContinuousActions[0];
+        float y = actionBuffers.ContinuousActions[1];
+        float z = actionBuffers.ContinuousActions[2];
+        float qx = actionBuffers.ContinuousActions[3];
+        float qy = actionBuffers.ContinuousActions[4];
+        bool isShoot = actionBuffers.DiscreteActions[0] == 1;
+        movementInput = new Vector3(x, y, z);
+        rotateInput = new Vector2(qx, qy);
+        
+        CustomFixedUpdate();
+        if (isShoot)
+        {
+            OnShoot();
+        }
+    }
+
+    public override void Heuristic(in ActionBuffers actionsOut)
+        // public override void Heuristic(float[] actionsOut)
+    {
+        var contActs = actionsOut.ContinuousActions;
+        contActs[0] = movementInput.x;
+        contActs[1] = movementInput.y;
+        contActs[2] = movementInput.z;
+        contActs[3] = rotateInput.x;
+        contActs[4] = rotateInput.y;
+        var discreteActs = actionsOut.DiscreteActions;
+        discreteActs[0] = 0;
+    }
+
+    public override void CollectObservations(VectorSensor sensor)
+    {
+        sensor.AddObservation(transform.rotation.eulerAngles.normalized); // 3
+        sensor.AddObservation(rb.velocity); // 3
+        sensor.AddObservation(rb.angularVelocity); // 3
+        Dictionary<String, object> spaceObservations = spaceManager.GetObservations();
+        sensor.AddObservation((Vector3)spaceObservations["gate"]); // 3
+        List<Vector3> mineralsDists = (List<Vector3>)spaceObservations["mineralsDists"];
+        List<Vector3> meteorsDists = (List<Vector3>)spaceObservations["meteorsDists"];
+        sensor.AddObservation((float)spaceObservations["meteorsNumber"]); // 1
+        for (int i = 0; i < 3; i++)
+        {
+            sensor.AddObservation(meteorsDists[i]);  // 9
+        }
+        sensor.AddObservation((float)spaceObservations["mineralsNumber"]); // 1
+        for (int i = 0; i < 3; i++)
+        {
+            sensor.AddObservation(mineralsDists[i]); // 9
+        }
+        
+        sensor.AddObservation(curShootCooldown); // 1
+        // Total obs: 33
+    }
+
+    public override void OnEpisodeBegin()
+    {
+        transform.position = startPosition;
+        transform.rotation = startRotate;
+        rb.angularVelocity = Vector3.zero;
+        rb.velocity = Vector3.zero;
+        movementInput = Vector3.zero;
+        rotateInput = Vector2.zero;
+        curMinerals = 0.0f;
+    }
+
     void OnMove(InputValue inputValue)
     {
         movementInput = inputValue.Get<Vector3>();
@@ -172,6 +248,7 @@ public class SpaceShipController : MonoBehaviour
                 {
                     MeteorScript meteor = hit.collider.GetComponent<MeteorScript>();
                     meteor.TakeHit();
+                    AddReward(0.1f);
                 }
             }
             for (int l = 0; l < lasers.Length; l++)
@@ -206,11 +283,13 @@ public class SpaceShipController : MonoBehaviour
     {
         curMinerals = Mathf.Min(maxMinerals, curMinerals + amount);
         cargoUI.SetCargo(curMinerals);
+        AddReward(0.1f);
         
     }
     
     public void SellMinerals()
     {
+        AddReward(curMinerals / maxMinerals * 10);
         curMinerals = 0.0f;
         cargoUI.SetCargo(0.0f);
     }

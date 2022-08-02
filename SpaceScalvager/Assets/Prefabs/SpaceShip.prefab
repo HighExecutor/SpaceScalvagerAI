@@ -3581,6 +3581,8 @@ GameObject:
   - component: {fileID: 4424099030350472446}
   - component: {fileID: 5836597384704000948}
   - component: {fileID: 4134447365718888801}
+  - component: {fileID: 7302181989489993806}
+  - component: {fileID: 1204455882418423792}
   m_Layer: 0
   m_Name: SpaceShip
   m_TagString: Untagged
@@ -3662,6 +3664,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24feadc63fb0ebd45b0115b004e3b080, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  agentParameters:
+    maxStep: 0
+  hasUpgradedFromAgentParameters: 1
+  MaxStep: 0
   velocity: 400
   angularVelocity: 60
   aimPosition: {fileID: 3600978519845619719}
@@ -3672,6 +3678,8 @@ MonoBehaviour:
   shootCooldown: 1
   shootRange: 200
   shootEffect: {fileID: 6732945901464148857, guid: 75cbf5945c6abf7469257253dbb7f15c, type: 3}
+  cargoUI: {fileID: 0}
+  maxMinerals: 0
 --- !u!54 &4134447365718888801
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3688,6 +3696,51 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &7302181989489993806
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6711890739042683536}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d1c4e0b1822b495aa52bc52839ecb30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_BrainParameters:
+    VectorObservationSize: 1
+    NumStackedVectorObservations: 1
+    m_ActionSpec:
+      m_NumContinuousActions: 5
+      BranchSizes: 01000000
+    VectorActionSize: 
+    VectorActionDescriptions: []
+    VectorActionSpaceType: 0
+    hasUpgradedBrainParametersWithActionSpec: 1
+  m_Model: {fileID: 0}
+  m_InferenceDevice: 0
+  m_BehaviorType: 1
+  m_BehaviorName: SpaceScalvager
+  TeamId: 0
+  m_UseChildSensors: 1
+  m_UseChildActuators: 1
+  m_DeterministicInference: 0
+  m_ObservableAttributeHandling: 0
+--- !u!114 &1204455882418423792
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6711890739042683536}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a5c9d521e5ef4759a8246a07d52221e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DecisionPeriod: 5
+  TakeActionsBetweenDecisions: 1
 --- !u!1 &6910127248982027659
 GameObject:
   m_ObjectHideFlags: 0
