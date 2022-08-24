@@ -16,12 +16,16 @@ public class SpaceManager : MonoBehaviour
     public GameObject mineralPrefab;
     private SpaceShipController player;
     private SphereCollider boundaryTrigger;
+    public GameObject initMeteor;
+    private Vector3 initMeteorPos;
+    public int initMeteorsNumber;
     
     // Start is called before the first frame update
     void Start()
     {
         player = GetComponentInChildren<SpaceShipController>();
         boundaryTrigger = GetComponent<SphereCollider>();
+        initMeteorPos = initMeteor.transform.position;
     }
 
     // Update is called once per frame
@@ -60,6 +64,7 @@ public class SpaceManager : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             SpaceShipController player = other.GetComponent<SpaceShipController>();
+            player.AddCustomReward(-1.0f);
             player.OnEpisodeBegin();
             MineralScript[] minerals = mineralsObject.GetComponentsInChildren<MineralScript>();
             foreach (var m in minerals)
@@ -125,5 +130,26 @@ public class SpaceManager : MonoBehaviour
         result["mineralsDists"] = mineralDists;
 
         return result;
+    }
+
+    public void Reset()
+    {
+        MeteorScript[] m = meteorsObject.GetComponentsInChildren<MeteorScript>();
+        int add = initMeteorsNumber - m.Length;
+        if (add > 0)
+        {
+            for (int i = 0; i < add; i++)
+            {
+                GenerateMeteor();
+            }
+        }
+
+        MeteorScript m0 = m[0];
+        m0.transform.position = initMeteorPos;
+        MineralScript[] mins = mineralsObject.GetComponentsInChildren<MineralScript>();
+        for (int i = 0; i < mins.Length; i++)
+        {
+            Destroy(mins[i].gameObject);
+        }
     }
 }

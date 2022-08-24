@@ -2,8 +2,8 @@ behaviors:
   SpaceScalvager:
     trainer_type: ppo
     hyperparameters:
-      batch_size: 10
-      buffer_size: 100
+      batch_size: 32
+      buffer_size: 8000
       learning_rate: 3.0e-4
       beta: 5.0e-4
       epsilon: 0.2
@@ -20,6 +20,6 @@ behaviors:
       extrinsic:
         gamma: 0.99
         strength: 1.0
-    max_steps: 500000
+    max_steps: 5000000
     time_horizon: 64
     summary_freq: 10000

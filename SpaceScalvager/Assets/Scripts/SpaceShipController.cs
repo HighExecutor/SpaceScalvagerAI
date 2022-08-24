@@ -156,14 +156,34 @@ public class SpaceShipController : Agent
         }
     }
 
+    // public override void OnActionReceived(ActionBuffers actionBuffers)
+    // {
+    //     float x = actionBuffers.ContinuousActions[0];
+    //     float y = actionBuffers.ContinuousActions[1];
+    //     float z = actionBuffers.ContinuousActions[2];
+    //     float qx = actionBuffers.ContinuousActions[3];
+    //     float qy = actionBuffers.ContinuousActions[4];
+    //     bool isShoot = actionBuffers.DiscreteActions[0] == 1;
+    //     Debug.Log("Acts: " + x + "; " + y + "; " + z + "; " + qx + "; " + qy + "; " + actionBuffers.DiscreteActions[0] + "; ");
+    //     movementInput = new Vector3(x, y, z);
+    //     rotateInput = new Vector2(qx, qy);
+    //     
+    //     CustomFixedUpdate();
+    //     if (isShoot)
+    //     {
+    //         OnShoot();
+    //     }
+    // }
+    
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-        float x = actionBuffers.ContinuousActions[0];
-        float y = actionBuffers.ContinuousActions[1];
-        float z = actionBuffers.ContinuousActions[2];
-        float qx = actionBuffers.ContinuousActions[3];
-        float qy = actionBuffers.ContinuousActions[4];
-        bool isShoot = actionBuffers.DiscreteActions[0] == 1;
+        float x = actionBuffers.DiscreteActions[0] - 1;
+        float y = actionBuffers.DiscreteActions[1] - 1;
+        float z = actionBuffers.DiscreteActions[2] - 1;
+        float qx = actionBuffers.DiscreteActions[3] - 1;
+        float qy = actionBuffers.DiscreteActions[4] - 1;
+        bool isShoot = actionBuffers.DiscreteActions[5] == 1;
+        Debug.Log("Acts: " + x + "; " + y + "; " + z + "; " + qx + "; " + qy + "; " + isShoot + "; ");
         movementInput = new Vector3(x, y, z);
         rotateInput = new Vector2(qx, qy);
         
@@ -177,38 +197,38 @@ public class SpaceShipController : Agent
     public override void Heuristic(in ActionBuffers actionsOut)
         // public override void Heuristic(float[] actionsOut)
     {
-        var contActs = actionsOut.ContinuousActions;
-        contActs[0] = movementInput.x;
-        contActs[1] = movementInput.y;
-        contActs[2] = movementInput.z;
-        contActs[3] = rotateInput.x;
-        contActs[4] = rotateInput.y;
         var discreteActs = actionsOut.DiscreteActions;
-        discreteActs[0] = 0;
+        discreteActs[0] = (int)movementInput.x + 1;
+        discreteActs[1] = (int)movementInput.y + 1;
+        discreteActs[2] = (int)movementInput.z + 1;
+        discreteActs[3] = (int)rotateInput.x + 1;
+        discreteActs[4] = (int)rotateInput.y + 1;
+        discreteActs[5] = 0;
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
         sensor.AddObservation(transform.rotation.eulerAngles.normalized); // 3
         sensor.AddObservation(rb.velocity); // 3
-        sensor.AddObservation(rb.angularVelocity); // 3
+        // sensor.AddObservation(rb.angularVelocity); // 3
         Dictionary<String, object> spaceObservations = spaceManager.GetObservations();
         sensor.AddObservation((Vector3)spaceObservations["gate"]); // 3
         List<Vector3> mineralsDists = (List<Vector3>)spaceObservations["mineralsDists"];
         List<Vector3> meteorsDists = (List<Vector3>)spaceObservations["meteorsDists"];
         sensor.AddObservation((float)spaceObservations["meteorsNumber"]); // 1
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 1; i++)
         {
-            sensor.AddObservation(meteorsDists[i]);  // 9
+            sensor.AddObservation(meteorsDists[i]);  // 3
         }
         sensor.AddObservation((float)spaceObservations["mineralsNumber"]); // 1
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 1; i++)
         {
-            sensor.AddObservation(mineralsDists[i]); // 9
+            sensor.AddObservation(mineralsDists[i]); // 3
         }
         
         sensor.AddObservation(curShootCooldown); // 1
-        // Total obs: 33
+        sensor.AddObservation(curMinerals / maxMinerals); // 1
+        // Total obs: 19
     }
 
     public override void OnEpisodeBegin()
@@ -220,6 +240,8 @@ public class SpaceShipController : Agent
         movementInput = Vector3.zero;
         rotateInput = Vector2.zero;
         curMinerals = 0.0f;
+        cargoUI.SetCargo(0.0f);
+        spaceManager.Reset();
     }
 
     void OnMove(InputValue inputValue)
@@ -292,6 +314,11 @@ public class SpaceShipController : Agent
         AddReward(curMinerals / maxMinerals * 10);
         curMinerals = 0.0f;
         cargoUI.SetCargo(0.0f);
+    }
+
+    public void AddCustomReward(float reward)
+    {
+        AddReward(reward);
     }
     
 }
