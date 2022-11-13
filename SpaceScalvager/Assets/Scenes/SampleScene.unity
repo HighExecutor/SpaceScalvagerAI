@@ -712,12 +712,11 @@ MonoBehaviour:
   m_SensorName: RayPerceptionSensor
   m_DetectableTags:
   - Meteor
-  - Planet
   - Mineral
   m_RaysPerDirection: 0
   m_MaxRayDegrees: 70
   m_SphereCastRadius: 0.5
-  m_RayLength: 100
+  m_RayLength: 200
   m_RayLayerMask:
     serializedVersion: 2
     m_Bits: 4294967240
@@ -726,6 +725,22 @@ MonoBehaviour:
   rayMissColor: {r: 1, g: 1, b: 1, a: 1}
   m_StartVerticalOffset: 0
   m_EndVerticalOffset: 0
+--- !u!114 &686803482
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 667402608}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2902496c0120472b90269f94a0aec7e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Record: 1
+  NumStepsToRecord: 0
+  DemonstrationName: 1meteor2stack
+  DemonstrationDirectory: E:\Projects\unity_projects\SpaceScalvagerAI\Experiments\demo
 --- !u!1001 &702686889
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1706,7 +1721,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-1376
+  m_Name: pb_Mesh-1374
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -2068,6 +2083,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1867174960}
     - target: {fileID: 5836597384704000948, guid: 85689e6ad6ed6b048a1274ba2c1a0ecd, type: 3}
+      propertyPath: velocity
+      value: 350
+      objectReference: {fileID: 0}
+    - target: {fileID: 5836597384704000948, guid: 85689e6ad6ed6b048a1274ba2c1a0ecd, type: 3}
       propertyPath: shootRange
       value: 200
       objectReference: {fileID: 0}
@@ -2079,6 +2098,10 @@ PrefabInstance:
       propertyPath: shootEffect
       value: 
       objectReference: {fileID: 6732945901464148857, guid: 75cbf5945c6abf7469257253dbb7f15c, type: 3}
+    - target: {fileID: 5836597384704000948, guid: 85689e6ad6ed6b048a1274ba2c1a0ecd, type: 3}
+      propertyPath: angularVelocity
+      value: 50
+      objectReference: {fileID: 0}
     - target: {fileID: 5836597384704000948, guid: 85689e6ad6ed6b048a1274ba2c1a0ecd, type: 3}
       propertyPath: lasers.Array.data[0]
       value: 
@@ -2137,7 +2160,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7302181989489993806, guid: 85689e6ad6ed6b048a1274ba2c1a0ecd, type: 3}
       propertyPath: m_BrainParameters.VectorObservationSize
-      value: 19
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 7302181989489993806, guid: 85689e6ad6ed6b048a1274ba2c1a0ecd, type: 3}
       propertyPath: m_BrainParameters.VectorActionSize.Array.size
@@ -2578,7 +2601,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-1364
+  m_Name: pb_Mesh-1362
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -2849,7 +2872,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-1352
+  m_Name: pb_Mesh-1350
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -3355,7 +3378,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-1292
+  m_Name: pb_Mesh-1290
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2

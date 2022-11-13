@@ -2,8 +2,8 @@ behaviors:
   SpaceScalvager:
     trainer_type: ppo
     hyperparameters:
-      batch_size: 32
-      buffer_size: 8000
+      batch_size: 128
+      buffer_size: 10000
       learning_rate: 3.0e-4
       beta: 5.0e-4
       epsilon: 0.2
@@ -14,12 +14,19 @@ behaviors:
       epsilon_schedule: linear
     network_settings:
       normalize: false
-      hidden_units: 128
-      num_layers: 2
+      hidden_units: 256
+      num_layers: 3
     reward_signals:
       extrinsic:
         gamma: 0.99
         strength: 1.0
+      curiosity:
+        gamma: 0.9
+        strength: 0.01
+      gail:
+        gamma: 0.99
+        strength: 0.8
+        demo_path: demo/1meteor2stack.demo
     max_steps: 5000000
     time_horizon: 64
     summary_freq: 10000

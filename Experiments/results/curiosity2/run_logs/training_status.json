@@ -1,0 +1,65 @@
+{
+    "SpaceScalvager": {
+        "checkpoints": [
+            {
+                "steps": 999984,
+                "file_path": "results\\curiosity2\\SpaceScalvager\\SpaceScalvager-999984.onnx",
+                "reward": 0.0,
+                "creation_time": 1661740866.9813054,
+                "auxillary_file_paths": [
+                    "results\\curiosity2\\SpaceScalvager\\SpaceScalvager-999984.pt"
+                ]
+            },
+            {
+                "steps": 1499984,
+                "file_path": "results\\curiosity2\\SpaceScalvager\\SpaceScalvager-1499984.onnx",
+                "reward": null,
+                "creation_time": 1661747879.46126,
+                "auxillary_file_paths": [
+                    "results\\curiosity2\\SpaceScalvager\\SpaceScalvager-1499984.pt"
+                ]
+            },
+            {
+                "steps": 1999984,
+                "file_path": "results\\curiosity2\\SpaceScalvager\\SpaceScalvager-1999984.onnx",
+                "reward": 0.20000000298023224,
+                "creation_time": 1661754875.3176467,
+                "auxillary_file_paths": [
+                    "results\\curiosity2\\SpaceScalvager\\SpaceScalvager-1999984.pt"
+                ]
+            },
+            {
+                "steps": 2499984,
+                "file_path": "results\\curiosity2\\SpaceScalvager\\SpaceScalvager-2499984.onnx",
+                "reward": 0.10000000149011612,
+                "creation_time": 1661761874.837858,
+                "auxillary_file_paths": [
+                    "results\\curiosity2\\SpaceScalvager\\SpaceScalvager-2499984.pt"
+                ]
+            },
+            {
+                "steps": 2706384,
+                "file_path": "results\\curiosity2\\SpaceScalvager\\SpaceScalvager-2706384.onnx",
+                "reward": 0.04000000059604645,
+                "creation_time": 1661764842.7710311,
+                "auxillary_file_paths": [
+                    "results\\curiosity2\\SpaceScalvager\\SpaceScalvager-2706384.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 2706384,
+            "file_path": "results\\curiosity2\\SpaceScalvager.onnx",
+            "reward": 0.04000000059604645,
+            "creation_time": 1661764842.7710311,
+            "auxillary_file_paths": [
+                "results\\curiosity2\\SpaceScalvager\\SpaceScalvager-2706384.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.9.1"
+    }
+}

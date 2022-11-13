@@ -203,7 +203,14 @@ public class SpaceShipController : Agent
         discreteActs[2] = (int)movementInput.z + 1;
         discreteActs[3] = (int)rotateInput.x + 1;
         discreteActs[4] = (int)rotateInput.y + 1;
-        discreteActs[5] = 0;
+        if (curShootCooldown == shootCooldown)
+        {
+            discreteActs[5] = 1;
+        }
+        else
+        {
+            discreteActs[5] = 0;
+        }
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -212,7 +219,7 @@ public class SpaceShipController : Agent
         sensor.AddObservation(rb.velocity); // 3
         // sensor.AddObservation(rb.angularVelocity); // 3
         Dictionary<String, object> spaceObservations = spaceManager.GetObservations();
-        sensor.AddObservation((Vector3)spaceObservations["gate"]); // 3
+        // sensor.AddObservation((Vector3)spaceObservations["gate"]); // 3
         List<Vector3> mineralsDists = (List<Vector3>)spaceObservations["mineralsDists"];
         List<Vector3> meteorsDists = (List<Vector3>)spaceObservations["meteorsDists"];
         sensor.AddObservation((float)spaceObservations["meteorsNumber"]); // 1
@@ -228,7 +235,7 @@ public class SpaceShipController : Agent
         
         sensor.AddObservation(curShootCooldown); // 1
         sensor.AddObservation(curMinerals / maxMinerals); // 1
-        // Total obs: 19
+        // Total obs: 16
     }
 
     public override void OnEpisodeBegin()
