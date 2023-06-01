@@ -47,8 +47,12 @@ public class SpaceShipController : Agent
         curShootCooldown = 0.0f;
         canShoot = true;
         curMinerals = 0.0f;
-        cargoUI.SetMaxCargo((int)maxMinerals);
-        cargoUI.SetCargo(0.0f);
+        if (cargoUI != null)
+        {
+            cargoUI.SetMaxCargo((int) maxMinerals);
+            cargoUI.SetCargo(0.0f);
+        }
+
         startPosition = transform.position;
         startRotate = transform.rotation;
         spaceManager = GetComponentInParent<SpaceManager>();
@@ -203,6 +207,7 @@ public class SpaceShipController : Agent
         discreteActs[2] = (int)movementInput.z + 1;
         discreteActs[3] = (int)rotateInput.x + 1;
         discreteActs[4] = (int)rotateInput.y + 1;
+        Debug.Log("Acts: " + discreteActs[0] + "; " + discreteActs[1] + "; " + discreteActs[2] + "; " + discreteActs[3] + "; " + discreteActs[4]);
         if (curShootCooldown == shootCooldown)
         {
             discreteActs[5] = 1;
@@ -216,26 +221,26 @@ public class SpaceShipController : Agent
     public override void CollectObservations(VectorSensor sensor)
     {
         sensor.AddObservation(transform.rotation.eulerAngles.normalized); // 3
-        sensor.AddObservation(rb.velocity); // 3
+        sensor.AddObservation(rb.velocity / velocity); // 3
         // sensor.AddObservation(rb.angularVelocity); // 3
         Dictionary<String, object> spaceObservations = spaceManager.GetObservations();
-        // sensor.AddObservation((Vector3)spaceObservations["gate"]); // 3
+        sensor.AddObservation((Vector3)spaceObservations["gate"] / velocity); // 3
         List<Vector3> mineralsDists = (List<Vector3>)spaceObservations["mineralsDists"];
         List<Vector3> meteorsDists = (List<Vector3>)spaceObservations["meteorsDists"];
         sensor.AddObservation((float)spaceObservations["meteorsNumber"]); // 1
         for (int i = 0; i < 1; i++)
         {
-            sensor.AddObservation(meteorsDists[i]);  // 3
+            sensor.AddObservation(meteorsDists[i] / velocity);  // 3
         }
         sensor.AddObservation((float)spaceObservations["mineralsNumber"]); // 1
         for (int i = 0; i < 1; i++)
         {
-            sensor.AddObservation(mineralsDists[i]); // 3
+            sensor.AddObservation(mineralsDists[i] / velocity); // 3
         }
         
         sensor.AddObservation(curShootCooldown); // 1
         sensor.AddObservation(curMinerals / maxMinerals); // 1
-        // Total obs: 16
+        // Total obs: 19
     }
 
     public override void OnEpisodeBegin()
@@ -247,7 +252,11 @@ public class SpaceShipController : Agent
         movementInput = Vector3.zero;
         rotateInput = Vector2.zero;
         curMinerals = 0.0f;
-        cargoUI.SetCargo(0.0f);
+        if (cargoUI != null)
+        {
+            cargoUI.SetCargo(0.0f);
+        }
+
         spaceManager.Reset();
     }
 
@@ -311,7 +320,11 @@ public class SpaceShipController : Agent
     public void TakeMineral(float amount)
     {
         curMinerals = Mathf.Min(maxMinerals, curMinerals + amount);
-        cargoUI.SetCargo(curMinerals);
+        if (cargoUI != null)
+        {
+            cargoUI.SetCargo(curMinerals);
+        }
+
         AddReward(0.1f);
         
     }
@@ -320,7 +333,10 @@ public class SpaceShipController : Agent
     {
         AddReward(curMinerals / maxMinerals * 10);
         curMinerals = 0.0f;
-        cargoUI.SetCargo(0.0f);
+        if (cargoUI != null)
+        {
+            cargoUI.SetCargo(0.0f);
+        }
     }
 
     public void AddCustomReward(float reward)
