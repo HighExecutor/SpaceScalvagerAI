@@ -36,6 +36,8 @@ public class SpaceShipController : Agent
 
     private Vector3 startPosition;
     private Quaternion startRotate;
+    
+    private EnvironmentParameters m_ResetParams;
 
 
     // Start is called before the first frame update
@@ -56,6 +58,7 @@ public class SpaceShipController : Agent
         startPosition = transform.position;
         startRotate = transform.rotation;
         spaceManager = GetComponentInParent<SpaceManager>();
+        m_ResetParams = Academy.Instance.EnvironmentParameters;
     }
 
     void CustomFixedUpdate()
@@ -85,6 +88,7 @@ public class SpaceShipController : Agent
             Vector3 forward = transform.forward * movementInput.z;
             Vector3 left = transform.right * movementInput.x;
             Vector3 up = transform.up * movementInput.y;
+            // TODO check that need normalized here
             Vector3 moveVector = (forward + left + up).normalized;
             rb.AddForce(moveVector * velocity * Time.fixedDeltaTime);
             
@@ -113,7 +117,7 @@ public class SpaceShipController : Agent
             }
             body.rotation = Quaternion.Euler(body.rotation.eulerAngles.x, body.rotation.eulerAngles.y, bodyAngle);
         }
-        if (movementInput.z > 0)
+        if (movementInput.z > 0 && !parts.isPlaying)
         {
             parts.Play();
         }
@@ -221,6 +225,7 @@ public class SpaceShipController : Agent
     public override void CollectObservations(VectorSensor sensor)
     {
         sensor.AddObservation(transform.rotation.eulerAngles.normalized); // 3
+        // sensor.AddObservation(transform.localRotation.eulerAngles / 360f); // 3
         sensor.AddObservation(rb.velocity / velocity); // 3
         // sensor.AddObservation(rb.angularVelocity); // 3
         Dictionary<String, object> spaceObservations = spaceManager.GetObservations();
@@ -231,6 +236,7 @@ public class SpaceShipController : Agent
         for (int i = 0; i < 1; i++)
         {
             sensor.AddObservation(meteorsDists[i] / velocity);  // 3
+            Debug.DrawLine(transform.position, transform.position + meteorsDists[i], Color.yellow);
         }
         sensor.AddObservation((float)spaceObservations["mineralsNumber"]); // 1
         for (int i = 0; i < 1; i++)
@@ -258,6 +264,12 @@ public class SpaceShipController : Agent
         }
 
         spaceManager.Reset();
+        int mMaxSteps = (int)m_ResetParams.GetWithDefault("max_steps", MaxStep);
+        if (MaxStep != mMaxSteps)
+        {
+            SetMaxStep(mMaxSteps);
+            Debug.Log("Cur max_steps = " + mMaxSteps);
+        }
     }
 
     void OnMove(InputValue inputValue)
@@ -342,6 +354,11 @@ public class SpaceShipController : Agent
     public void AddCustomReward(float reward)
     {
         AddReward(reward);
+    }
+    
+    public void SetMaxStep(int maxSteps)
+    {
+        MaxStep = maxSteps;
     }
     
 }

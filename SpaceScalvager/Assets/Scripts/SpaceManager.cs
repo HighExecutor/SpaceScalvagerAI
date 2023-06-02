@@ -88,6 +88,7 @@ public class SpaceManager : MonoBehaviour
             IEnumerable<Vector3> meteorsPositions = meteors.Select(x => x.transform.position);
             IEnumerator<Vector3> meteorsDistances =
                 meteorsPositions.OrderByDescending(x => Vector3.Distance(x, player.transform.position)).GetEnumerator();
+            meteorsDistances.MoveNext();
             int m = Mathf.Min(3, meteors.Length);
             while (m > 0)
             {
@@ -108,6 +109,7 @@ public class SpaceManager : MonoBehaviour
             IEnumerator<Vector3> mineralsDistances =
                 mineralsPositions.OrderByDescending(x => Vector3.Distance(x, player.transform.position))
                     .GetEnumerator();
+            mineralsDistances.MoveNext();
             int m = Mathf.Min(3, minerals.Length);
             while (m > 0)
             {

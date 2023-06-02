@@ -1,0 +1,60 @@
+behaviors:
+  SpaceScalvager:
+    trainer_type: ppo
+    hyperparameters:
+      batch_size: 256
+      buffer_size: 8192
+      learning_rate: 3.0e-4
+      beta: 5.0e-4
+      epsilon: 0.2
+      lambd: 0.99
+      num_epoch: 8
+      learning_rate_schedule: linear
+      beta_schedule: constant
+      epsilon_schedule: linear
+    network_settings:
+      normalize: false
+      hidden_units: 64
+      num_layers: 2
+    reward_signals:
+      extrinsic:
+        gamma: 0.99
+        strength: 1.0      
+    max_steps: 5000000
+    time_horizon: 64
+    summary_freq: 50000
+environment_parameters:
+    max_steps:
+        curriculum:
+          - name: mission1
+            completion_criteria:
+              measure: reward
+              behavior: SpaceScalvager
+              signal_smoothing: true
+              min_lesson_length: 10
+              threshold: 0.2
+            value: 500.0
+          - name: mission2
+            completion_criteria:
+              measure: reward
+              behavior: SpaceScalvager
+              signal_smoothing: true
+              min_lesson_length: 10
+              threshold: 0.3
+            value: 1000.0
+          - name: mission3
+            completion_criteria:
+              measure: reward
+              behavior: SpaceScalvager
+              signal_smoothing: true
+              min_lesson_length: 10
+              threshold: 0.4
+            value: 2000.0
+          - name: mission4
+            completion_criteria:
+              measure: reward
+              behavior: SpaceScalvager
+              signal_smoothing: true
+              min_lesson_length: 10
+              threshold: 0.5
+            value: 10000.0
