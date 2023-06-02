@@ -2000,7 +2000,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7302181989489993806, guid: 85689e6ad6ed6b048a1274ba2c1a0ecd, type: 3}
       propertyPath: m_BehaviorType
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7302181989489993806, guid: 85689e6ad6ed6b048a1274ba2c1a0ecd, type: 3}
       propertyPath: m_InferenceDevice
@@ -2008,7 +2008,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7302181989489993806, guid: 85689e6ad6ed6b048a1274ba2c1a0ecd, type: 3}
       propertyPath: m_BrainParameters.VectorObservationSize
-      value: 19
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 7302181989489993806, guid: 85689e6ad6ed6b048a1274ba2c1a0ecd, type: 3}
       propertyPath: m_BrainParameters.VectorActionSize.Array.size

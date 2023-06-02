@@ -60,8 +60,8 @@ public class SpaceShipController : Agent
         spaceManager = GetComponentInParent<SpaceManager>();
         m_ResetParams = Academy.Instance.EnvironmentParameters;
     }
-
-    void CustomFixedUpdate()
+    
+    private void FixedUpdate()
     {
         Move();
         UpdateCooldown();
@@ -88,8 +88,7 @@ public class SpaceShipController : Agent
             Vector3 forward = transform.forward * movementInput.z;
             Vector3 left = transform.right * movementInput.x;
             Vector3 up = transform.up * movementInput.y;
-            // TODO check that need normalized here
-            Vector3 moveVector = (forward + left + up).normalized;
+            Vector3 moveVector = (forward + left + up);
             rb.AddForce(moveVector * velocity * Time.fixedDeltaTime);
             
         }
@@ -163,25 +162,6 @@ public class SpaceShipController : Agent
             transform.rotation = Quaternion.Euler(vertAngle, horAngle, diagAngle);
         }
     }
-
-    // public override void OnActionReceived(ActionBuffers actionBuffers)
-    // {
-    //     float x = actionBuffers.ContinuousActions[0];
-    //     float y = actionBuffers.ContinuousActions[1];
-    //     float z = actionBuffers.ContinuousActions[2];
-    //     float qx = actionBuffers.ContinuousActions[3];
-    //     float qy = actionBuffers.ContinuousActions[4];
-    //     bool isShoot = actionBuffers.DiscreteActions[0] == 1;
-    //     Debug.Log("Acts: " + x + "; " + y + "; " + z + "; " + qx + "; " + qy + "; " + actionBuffers.DiscreteActions[0] + "; ");
-    //     movementInput = new Vector3(x, y, z);
-    //     rotateInput = new Vector2(qx, qy);
-    //     
-    //     CustomFixedUpdate();
-    //     if (isShoot)
-    //     {
-    //         OnShoot();
-    //     }
-    // }
     
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
@@ -191,11 +171,10 @@ public class SpaceShipController : Agent
         float qx = actionBuffers.DiscreteActions[3] - 1;
         float qy = actionBuffers.DiscreteActions[4] - 1;
         bool isShoot = actionBuffers.DiscreteActions[5] == 1;
-        Debug.Log("Acts: " + x + "; " + y + "; " + z + "; " + qx + "; " + qy + "; " + isShoot + "; ");
+        // Debug.Log("Acts: " + x + "; " + y + "; " + z + "; " + qx + "; " + qy + "; " + isShoot + "; ");
         movementInput = new Vector3(x, y, z);
         rotateInput = new Vector2(qx, qy);
         
-        CustomFixedUpdate();
         if (isShoot)
         {
             OnShoot();
@@ -203,7 +182,6 @@ public class SpaceShipController : Agent
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
-        // public override void Heuristic(float[] actionsOut)
     {
         var discreteActs = actionsOut.DiscreteActions;
         discreteActs[0] = (int)movementInput.x + 1;
@@ -211,7 +189,7 @@ public class SpaceShipController : Agent
         discreteActs[2] = (int)movementInput.z + 1;
         discreteActs[3] = (int)rotateInput.x + 1;
         discreteActs[4] = (int)rotateInput.y + 1;
-        Debug.Log("Acts: " + discreteActs[0] + "; " + discreteActs[1] + "; " + discreteActs[2] + "; " + discreteActs[3] + "; " + discreteActs[4]);
+        // Debug.Log("Acts: " + discreteActs[0] + "; " + discreteActs[1] + "; " + discreteActs[2] + "; " + discreteActs[3] + "; " + discreteActs[4]);
         if (curShootCooldown == shootCooldown)
         {
             discreteActs[5] = 1;
@@ -224,8 +202,8 @@ public class SpaceShipController : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        sensor.AddObservation(transform.rotation.eulerAngles.normalized); // 3
         // sensor.AddObservation(transform.localRotation.eulerAngles / 360f); // 3
+        sensor.AddObservation(transform.localRotation); // 4
         sensor.AddObservation(rb.velocity / velocity); // 3
         // sensor.AddObservation(rb.angularVelocity); // 3
         Dictionary<String, object> spaceObservations = spaceManager.GetObservations();
@@ -246,7 +224,7 @@ public class SpaceShipController : Agent
         
         sensor.AddObservation(curShootCooldown); // 1
         sensor.AddObservation(curMinerals / maxMinerals); // 1
-        // Total obs: 19
+        // Total obs: 20
     }
 
     public override void OnEpisodeBegin()
