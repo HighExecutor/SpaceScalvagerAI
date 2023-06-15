@@ -65,12 +65,7 @@ public class SpaceManager : MonoBehaviour
         {
             SpaceShipController player = other.GetComponent<SpaceShipController>();
             player.AddCustomReward(-1.0f);
-            player.OnEpisodeBegin();
-            MineralScript[] minerals = mineralsObject.GetComponentsInChildren<MineralScript>();
-            foreach (var m in minerals)
-            {
-                Destroy(m.gameObject);
-            }
+            player.EndEpisode();
         }
     }
 
@@ -136,6 +131,12 @@ public class SpaceManager : MonoBehaviour
 
     public void Reset()
     {
+        MineralScript[] minerals = mineralsObject.GetComponentsInChildren<MineralScript>();
+        foreach (var mn in minerals)
+        {
+            Destroy(mn.gameObject);
+        }
+        
         MeteorScript[] m = meteorsObject.GetComponentsInChildren<MeteorScript>();
         int add = initMeteorsNumber - m.Length;
         if (add > 0)

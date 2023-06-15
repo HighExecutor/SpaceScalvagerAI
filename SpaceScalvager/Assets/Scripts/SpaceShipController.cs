@@ -229,6 +229,7 @@ public class SpaceShipController : Agent
 
     public override void OnEpisodeBegin()
     {
+        spaceManager.Reset();
         transform.position = startPosition;
         transform.rotation = startRotate;
         rb.angularVelocity = Vector3.zero;
@@ -240,8 +241,7 @@ public class SpaceShipController : Agent
         {
             cargoUI.SetCargo(0.0f);
         }
-
-        spaceManager.Reset();
+        
         int mMaxSteps = (int)m_ResetParams.GetWithDefault("max_steps", MaxStep);
         if (MaxStep != mMaxSteps)
         {

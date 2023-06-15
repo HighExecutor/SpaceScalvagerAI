@@ -1,0 +1,17 @@
+# Mac hidden files
+*.DS_Store
+*/.ipynb_checkpoints
+*/.idea
+*/__pycache__
+*.pyc
+*.idea/misc.xml
+*.idea/modules.xml
+*.idea/
+*.iml
+*.cache
+*/build/
+*/dist/
+*.egg-info*
+*.eggs*
+*.gitignore.swp
+
