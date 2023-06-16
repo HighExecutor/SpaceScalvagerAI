@@ -2,14 +2,17 @@ import numpy as np
 import time
 import random
 from gym.spaces import Box, MultiDiscrete, Tuple as TupleSpace
-from typing import Callable, Optional, Tuple
+from typing import Callable, Optional, Tuple, List, Dict
 
 from ray.rllib.env.multi_agent_env import MultiAgentEnv
+from ray.rllib.env.apis.task_settable_env import TaskSettableEnv
 from ray.rllib.policy.policy import PolicySpec
 from ray.rllib.utils.typing import MultiAgentDict, PolicyID, AgentID
 from mlagents_envs.base_env import ActionTuple
+from mlagents_envs.side_channel.environment_parameters_channel import EnvironmentParametersChannel
 
-class SpaceScalEnv(MultiAgentEnv):
+
+class SpaceScalEnv(MultiAgentEnv, TaskSettableEnv):
     # Default base port when connecting directly to the Editor
     _BASE_PORT_EDITOR = 5105
     # Default base port when connecting to a compiled environment
@@ -24,10 +27,13 @@ class SpaceScalEnv(MultiAgentEnv):
                  no_graphics: bool = False,
                  timeout_wait: int = 300,
                  episode_horizon: int = 200,
+                 curriculum_config=None,
+                 additional_args: List[str] = None,
                  ):
         super().__init__()
+        if curriculum_config is None:
+            curriculum_config = {}
         self.env_name = env_name
-
 
         if file_name is None:
             print(
@@ -42,9 +48,6 @@ class SpaceScalEnv(MultiAgentEnv):
         # Try connecting to the Unity3D game instance. If a port is blocked
         port_ = None
         while True:
-            # Sleep for random time to allow for concurrent startup of many
-            # environments (num_workers >> 1). Otherwise, would lead to port
-            # conflicts sometimes.
             if port_ is not None:
                 time.sleep(random.randint(1, 10))
             port_ = port or (
@@ -54,15 +57,17 @@ class SpaceScalEnv(MultiAgentEnv):
             # increase it for the next environment
             worker_id_ = SpaceScalEnv._WORKER_ID if file_name else 0
             SpaceScalEnv._WORKER_ID += 1
+            self.environment_parameters_side_channel = EnvironmentParametersChannel()
             try:
                 self.unity_env = UnityEnvironment(
                     file_name=file_name,
                     worker_id=worker_id_,
                     base_port=port_,
                     seed=seed,
+                    side_channels=[self.environment_parameters_side_channel],
                     no_graphics=no_graphics,
                     timeout_wait=timeout_wait,
-                    # additional_args=['--time-scale', '10'],
+                    additional_args=additional_args,
                 )
                 print("Created UnityEnvironment for port {}".format(port_ + worker_id_))
             except mlagents_envs.exception.UnityWorkerInUseException:
@@ -78,8 +83,11 @@ class SpaceScalEnv(MultiAgentEnv):
         self.episode_horizon = episode_horizon
         # Keep track of how many times we have called `step` so far.
         self.episode_timesteps = 0
-
-
+        # Curriculum
+        self.curriculum_config = curriculum_config
+        self.changes_to_task = None
+        self.cur_task = None
+        self.setup_curriculum_config()
 
     def step(
             self, action_dict: MultiAgentDict
@@ -96,7 +104,8 @@ class SpaceScalEnv(MultiAgentEnv):
                     actions.append(action_dict[key])
                 if actions:
                     if isinstance(actions[0], Tuple):
-                        action_tuple = ActionTuple(continuous=np.array([actions[0][0]]), discrete=np.array([actions[0][1]]))
+                        action_tuple = ActionTuple(continuous=np.array([actions[0][0]]),
+                                                   discrete=np.array([actions[0][1]]))
                     elif actions[0].dtype == np.float32:
                         action_tuple = ActionTuple(continuous=np.array(actions))
                     else:
@@ -122,6 +131,9 @@ class SpaceScalEnv(MultiAgentEnv):
         return obs, rewards, dones, infos
 
     def reset(self) -> MultiAgentDict:
+        # Curriculum
+        if self.changes_to_task:
+            self.update_and_send_task_to_unity(self.changes_to_task)
         """Resets the entire Unity3D scene (a single multi-agent episode)."""
         self.episode_timesteps = 0
         self.unity_env.reset()
@@ -145,17 +157,11 @@ class SpaceScalEnv(MultiAgentEnv):
         rewards = {}
         infos = {}
         dones = {}
-        # NOTE: RY: When there is a terminal step, there tends to also be a decision step,
-        # we are unsure what the decision step is and have opted to ignore it for now
         all_done = False
         for behavior_name in self.unity_env.behavior_specs:
             decision_steps, terminal_steps = self.unity_env.get_steps(
                 behavior_name)
 
-            # Important: Only update those sub-envs that are currently
-            # available within _env_state.
-            # Loop through all envs ("agents") and fill in, whatever
-            # information we have.
             for agent_id, idx in decision_steps.agent_id_to_index.items():
                 key = behavior_name + "_{}".format(agent_id)
                 dones[key] = False
@@ -170,7 +176,7 @@ class SpaceScalEnv(MultiAgentEnv):
 
                 dones[key] = True
                 # Only overwrite rewards (last reward in episode), b/c obs
-                # here is the last obs (which doesn't matter anyways).
+                # here is the last obs.
                 # Unless key does not exist in obs.
                 if key not in obs:
                     os = tuple(o[idx] for o in terminal_steps.obs)
@@ -187,14 +193,14 @@ class SpaceScalEnv(MultiAgentEnv):
             game_name: str,
     ) -> Tuple[dict, Callable[[AgentID], PolicyID]]:
         obs_spaces = {
-            "SpaceShip": TupleSpace([
+            "SpaceScalvager": TupleSpace([
                 Box(float("-inf"), float("inf"), (4,)),
                 Box(float("-inf"), float("inf"), (20,)),
             ])
         }
 
         action_spaces = {
-            "SpaceShip": MultiDiscrete([3, 3, 3, 3, 3, 2])
+            "SpaceScalvager": MultiDiscrete([3, 3, 3, 3, 3, 2])
         }
 
         policies = {
@@ -208,3 +214,22 @@ class SpaceScalEnv(MultiAgentEnv):
             return game_name
 
         return policies, policy_mapping_fn
+
+    # Curriculum
+    def setup_curriculum_config(self):
+        if self.curriculum_config:
+            assert self.curriculum_config[0]
+            self.update_and_send_task_to_unity(0)
+
+    def get_task(self) -> dict:
+        return {"task_id": self.cur_task, "task_data": self.curriculum_config[self.cur_task]}
+
+    def set_task(self, changes_to_task):
+        if changes_to_task != self.cur_task and changes_to_task in self.curriculum_config:
+            self.changes_to_task = changes_to_task
+
+    def update_and_send_task_to_unity(self, change_to_task):
+        self.cur_task = change_to_task
+        for k, v in self.curriculum_config[self.cur_task]["env_args"].items():
+            self.environment_parameters_side_channel.set_float_parameter(k, v)
+        self.changes_to_task = None
