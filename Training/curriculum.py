@@ -39,21 +39,42 @@ curriculum_config = {
         "name": "initial",
         "mean_reward": 0.3,
         "env_args": {
-            "max_steps": 500
+            "max_steps": 800,
+            "sell_price": 0
         }
     },
     1: {
         "name": "hit_more",
-        "mean_reward": 0.8,
+        "mean_reward": 0.6,
         "env_args": {
-            "max_steps": 2000
+            "max_steps": 2000,
+            "sell_price": 0
         }
     },
     2: {
+        "name": "hit_more_and_try_sell",
+        "mean_reward": 1.0,
+        "env_args": {
+            "max_steps": 3000,
+            "sell_price": 1
+        }
+    },
+    3: {
         "name": "hit and sell",
         "mean_reward": 1.5,
         "env_args": {
-            "max_steps": 4000
+            "max_steps": 5000,
+            "sell_price": 2
+        }
+    }
+}
+
+single_task = {
+    0: {
+        "name": "initial",
+        "mean_reward": 0.3,
+        "env_args": {
+            "max_steps": 0
         }
     }
 }

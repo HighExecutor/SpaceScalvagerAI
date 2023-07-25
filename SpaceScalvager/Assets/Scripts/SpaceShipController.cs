@@ -33,6 +33,7 @@ public class SpaceShipController : Agent
     private SpaceManager spaceManager;
     private float curMinerals;
     public float maxMinerals;
+    public float sellPrice;
 
     private Vector3 startPosition;
     private Quaternion startRotate;
@@ -248,6 +249,12 @@ public class SpaceShipController : Agent
             SetMaxStep(mMaxSteps);
             Debug.Log("Cur max_steps = " + mMaxSteps);
         }
+        float mSellPrice = m_ResetParams.GetWithDefault("sell_price", sellPrice);
+        if (sellPrice != mSellPrice)
+        {
+            sellPrice = mSellPrice;
+            Debug.Log("Cur sell_price = " + mSellPrice);
+        }
     }
 
     void OnMove(InputValue inputValue)
@@ -321,7 +328,7 @@ public class SpaceShipController : Agent
     
     public void SellMinerals()
     {
-        AddReward(curMinerals / maxMinerals * 10);
+        AddReward(curMinerals / maxMinerals * sellPrice);
         curMinerals = 0.0f;
         if (cargoUI != null)
         {

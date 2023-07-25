@@ -4,20 +4,20 @@ import ray
 from ray import tune
 from ray.rllib.algorithms.ppo import PPO, PPOConfig
 from space_env import SpaceScalEnv
-from curriculum import curriculum_config, curriculum_fn, CurriculumCallback
+from curriculum import curriculum_config, curriculum_fn, CurriculumCallback, single_task
 
 ray.init(local_mode=False)
 
 args = argparse.Namespace
 args.env = "SpaceScalEnv"
-args.file_name = "C:\\wspace\\projects\\space_main\\SpaceScalvagerAI\\SpaceScalvager\\Build\\SpaceScalvager.exe"
+args.file_name = "E:\\Projects\\SpaceScalvagerAI\\SpaceScalvager\\Build\\SpaceScalvager.exe"
 # args.file_name = None
 args.from_checkpoint = None
 args.stop_iters = 999999
 args.stop_timesteps = 999999999
 args.stop_reward = 9999.0
 args.framework = "torch"
-args.num_workers = 1
+args.num_workers = 4
 args.no_graphics = False
 
 policies, policy_mapping_fn = SpaceScalEnv.get_policy_configs_for_game("SpaceScalvager")
@@ -40,20 +40,20 @@ config = (
     .framework(args.framework)
     .rollouts(
         num_rollout_workers=args.num_workers if args.file_name else 0,
-        rollout_fragment_length=200,
+        rollout_fragment_length=1000,
         batch_mode="complete_episodes"
     )
     .training(
         lr=0.0003,
         lambda_=0.95,
         gamma=0.99,
-        sgd_minibatch_size=256,
-        train_batch_size=4096,
+        sgd_minibatch_size=512,
+        train_batch_size=16384,
         num_sgd_iter=8,
         vf_loss_coeff=1.0,
         clip_param=0.2,
-        entropy_coeff=0.002,
-        model={"fcnet_hiddens": [64, 64],
+        entropy_coeff=0.02,
+        model={"fcnet_hiddens": [32, 32],
                "vf_share_layers": False},
     )
     .multi_agent(policies=policies, policy_mapping_fn=policy_mapping_fn)
