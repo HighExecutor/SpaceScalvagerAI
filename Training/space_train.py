@@ -53,7 +53,7 @@ config = (
         vf_loss_coeff=1.0,
         clip_param=0.2,
         entropy_coeff=0.02,
-        model={"fcnet_hiddens": [32, 32],
+        model={"fcnet_hiddens": [64, 64],
                "vf_share_layers": False},
     )
     .multi_agent(policies=policies, policy_mapping_fn=policy_mapping_fn)

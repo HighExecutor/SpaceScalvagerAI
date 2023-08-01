@@ -34,10 +34,15 @@ public class SpaceShipController : Agent
     private float curMinerals;
     public float maxMinerals;
     public float sellPrice;
+    private float credits;
+    public bool openHelp;
 
     private Vector3 startPosition;
     private Quaternion startRotate;
-    
+
+    private DecisionRequester decisionRequester;
+    private Unity.MLAgents.Policies.BehaviorParameters behaviour;
+
     private EnvironmentParameters m_ResetParams;
 
 
@@ -46,14 +51,28 @@ public class SpaceShipController : Agent
     {
         rb = GetComponent<Rigidbody>();
         parts = GetComponentInChildren<ParticleSystem>();
+        decisionRequester = GetComponent<DecisionRequester>();
+        behaviour = GetComponent<Unity.MLAgents.Policies.BehaviorParameters>();
         body = transform.GetChild(0);
         curShootCooldown = 0.0f;
         canShoot = true;
         curMinerals = 0.0f;
+        credits = 0.0f;
         if (cargoUI != null)
         {
             cargoUI.SetMaxCargo((int) maxMinerals);
             cargoUI.SetCargo(0.0f);
+            int modelMode = 0;
+            if (behaviour.BehaviorType == Unity.MLAgents.Policies.BehaviorType.HeuristicOnly)
+            {
+                modelMode = 1;
+            }
+            if (behaviour.BehaviorType == Unity.MLAgents.Policies.BehaviorType.InferenceOnly)
+            {
+                modelMode = 2;
+            }
+            cargoUI.SetModelControl(modelMode);
+            cargoUI.SetHelpEnabled(openHelp);
         }
 
         startPosition = transform.position;
@@ -238,9 +257,11 @@ public class SpaceShipController : Agent
         movementInput = Vector3.zero;
         rotateInput = Vector2.zero;
         curMinerals = 0.0f;
+        credits = 0.0f;
         if (cargoUI != null)
         {
             cargoUI.SetCargo(0.0f);
+            cargoUI.SetCredutValue(0.0f);
         }
         
         int mMaxSteps = (int)m_ResetParams.GetWithDefault("max_steps", MaxStep);
@@ -297,6 +318,40 @@ public class SpaceShipController : Agent
         }
     }
 
+    void OnHelp()
+    {
+        openHelp = !openHelp;
+        if (cargoUI != null) {
+            cargoUI.SetHelpEnabled(openHelp);
+        }
+    }
+
+    void OnHeuristic()
+    {
+        if (behaviour.BehaviorType != Unity.MLAgents.Policies.BehaviorType.Default)
+        {
+            if (behaviour.BehaviorType == Unity.MLAgents.Policies.BehaviorType.HeuristicOnly)
+            {
+                if (behaviour.Model != null)
+                {
+                    decisionRequester.DecisionPeriod = 4;
+                    behaviour.BehaviorType = Unity.MLAgents.Policies.BehaviorType.InferenceOnly;
+                    cargoUI.SetModelControl(2);
+                }
+            }
+            else
+            {
+                decisionRequester.DecisionPeriod = 1;
+                behaviour.BehaviorType = Unity.MLAgents.Policies.BehaviorType.HeuristicOnly;
+                cargoUI.SetModelControl(1);
+            }
+        }
+        else
+        {
+            cargoUI.SetModelControl(0);
+        }
+    }
+
     IEnumerator SpawnTrail(TrailRenderer trail, float range, float maxRange)
     {
         float time = 0f;
@@ -329,10 +384,12 @@ public class SpaceShipController : Agent
     public void SellMinerals()
     {
         AddReward(curMinerals / maxMinerals * sellPrice);
+        credits += curMinerals * sellPrice;
         curMinerals = 0.0f;
         if (cargoUI != null)
         {
             cargoUI.SetCargo(0.0f);
+            cargoUI.SetCredutValue(credits);
         }
     }
 

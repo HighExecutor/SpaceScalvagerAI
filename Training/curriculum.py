@@ -55,7 +55,7 @@ curriculum_config = {
         "name": "hit_more_and_try_sell",
         "mean_reward": 1.0,
         "env_args": {
-            "max_steps": 3000,
+            "max_steps": 4000,
             "sell_price": 1
         }
     },
@@ -63,7 +63,7 @@ curriculum_config = {
         "name": "hit and sell",
         "mean_reward": 1.5,
         "env_args": {
-            "max_steps": 5000,
+            "max_steps": 10000,
             "sell_price": 2
         }
     }

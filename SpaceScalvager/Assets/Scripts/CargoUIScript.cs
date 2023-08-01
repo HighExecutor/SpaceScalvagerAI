@@ -9,6 +9,11 @@ public class CargoUIScript : MonoBehaviour
     public Slider slider;
     public TextMeshProUGUI text;
 
+    public TextMeshProUGUI credits;
+    public TextMeshProUGUI modelControl;
+    public TextMeshProUGUI controlsHelp;
+
+
     public void SetMaxCargo(int maxCargo)
     {
         slider.maxValue = maxCargo;
@@ -24,5 +29,31 @@ public class CargoUIScript : MonoBehaviour
     public void SetText(float curCargo)
     {
         text.text = (int) curCargo + " / " + slider.maxValue;
+    }
+
+    public void SetCredutValue(float curCredits)
+    {
+        credits.text = (int)curCredits + " Cr";
+    }
+
+    public void SetModelControl(int mode)
+    {
+        if (mode == 0)
+        {
+            modelControl.text = "Default";
+        }
+        if (mode == 1)
+        {
+            modelControl.text = "Player";
+        }
+        if (mode == 2)
+        {
+            modelControl.text = "AI";
+        }
+    }
+
+    public void SetHelpEnabled(bool openHelp)
+    {
+        controlsHelp.gameObject.SetActive(openHelp);
     }
 }
