@@ -7,9 +7,9 @@ The spaceship pilot want to make some credits by selling scalvaged minerals.
 4. Get your credits!
 
 Project includes:
-UnityML agents environment (SpaceScalvager)
-Configs for training with ML Agents
-Python scripts for training\exporting with RLLib - preferable. Need to build unity project as exe file.
+1. UnityML agents environment (SpaceScalvager).
+2. Configs for training with ML Agents.
+3. Python scripts for training\exporting with RLLib - preferable. Need to build unity project as exe file.
 
 The game:
 https://swingshuffle.itch.io/spacescalvagerai
