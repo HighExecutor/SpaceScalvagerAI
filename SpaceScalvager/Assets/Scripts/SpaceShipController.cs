@@ -352,6 +352,11 @@ public class SpaceShipController : Agent
         }
     }
 
+    void OnReset()
+    {
+        EndEpisode();
+    }
+
     IEnumerator SpawnTrail(TrailRenderer trail, float range, float maxRange)
     {
         float time = 0f;
