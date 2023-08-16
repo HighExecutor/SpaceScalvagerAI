@@ -18,6 +18,7 @@ public class SpaceManager : MonoBehaviour
     public GameObject initMeteor;
     private Vector3 initMeteorPos;
     public int initMeteorsNumber;
+    public SpaceShipController[] ships;
     
     // Start is called before the first frame update
     void Start()
@@ -67,8 +68,9 @@ public class SpaceManager : MonoBehaviour
         }
     }
 
-    public Dictionary<String, object> GetObservations(Vector3 shipPosition)
+    public Dictionary<String, object> GetObservations(int shipIdx)
     {
+        Vector3 shipPosition = ships[shipIdx].transform.position;
         Dictionary<String, object> result = new Dictionary<String, object>();
         result["gate"] = GetComponentInChildren<GateScript>().transform.position - shipPosition;
         result["meteorsPos"] = meteorsPosition.transform.position - shipPosition;
@@ -123,7 +125,28 @@ public class SpaceManager : MonoBehaviour
             }
         }
         result["mineralsDists"] = mineralDists;
+        result["shipDist"] = GetMinDistanceToShips(shipIdx);
 
+        return result;
+    }
+
+    private Vector3 GetMinDistanceToShips(int shipIdx)
+    {
+        Vector3 result = Vector3.zero;
+        float minMag = float.PositiveInfinity;
+        for (int i = 0; i < ships.Length; i++)
+        {
+            if (shipIdx != i)
+            {
+                Vector3 curDist = ships[i].transform.position - ships[shipIdx].transform.position;
+                float curMag = curDist.magnitude;
+                if (curMag < minMag)
+                {
+                    minMag = curMag;
+                    result = curDist;
+                }
+            }
+        }
         return result;
     }
 
@@ -151,6 +174,14 @@ public class SpaceManager : MonoBehaviour
         for (int i = 0; i < mins.Length; i++)
         {
             Destroy(mins[i].gameObject);
+        }
+    }
+
+    public void EndEpisodeAll()
+    {
+        for (int i = 0; i < ships.Length; i++)
+        {
+            ships[i].EndEpisode();
         }
     }
 }

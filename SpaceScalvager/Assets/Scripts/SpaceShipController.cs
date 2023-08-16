@@ -36,6 +36,7 @@ public class SpaceShipController : Agent
     public float sellPrice;
     private float credits;
     public bool openHelp;
+    public int shipId = 0;
 
     private Vector3 startPosition;
     private Quaternion startRotate;
@@ -58,7 +59,7 @@ public class SpaceShipController : Agent
         canShoot = true;
         curMinerals = 0.0f;
         credits = 0.0f;
-        if (cargoUI != null)
+        if (cargoUI != null && shipId == 0)
         {
             cargoUI.SetMaxCargo((int) maxMinerals);
             cargoUI.SetCargo(0.0f);
@@ -226,7 +227,7 @@ public class SpaceShipController : Agent
         sensor.AddObservation(transform.localRotation); // 4
         sensor.AddObservation(rb.velocity / velocity); // 3
         // sensor.AddObservation(rb.angularVelocity); // 3
-        Dictionary<String, object> spaceObservations = spaceManager.GetObservations(transform.position);
+        Dictionary<String, object> spaceObservations = spaceManager.GetObservations(shipId);
         sensor.AddObservation((Vector3)spaceObservations["gate"] / velocity); // 3
         List<Vector3> mineralsDists = (List<Vector3>)spaceObservations["mineralsDists"];
         List<Vector3> meteorsDists = (List<Vector3>)spaceObservations["meteorsDists"];
@@ -241,15 +242,20 @@ public class SpaceShipController : Agent
         {
             sensor.AddObservation(mineralsDists[i] / velocity); // 3
         }
-        
+        sensor.AddObservation((Vector3)spaceObservations["shipDist"] / velocity); // 3
+
+
         sensor.AddObservation(curShootCooldown); // 1
         sensor.AddObservation(curMinerals / maxMinerals); // 1
-        // Total obs: 32
+        // Total obs: 35
     }
 
     public override void OnEpisodeBegin()
     {
-        spaceManager.Reset();
+        if (shipId == 0)
+        {
+            spaceManager.Reset();
+        }
         transform.position = startPosition;
         transform.rotation = startRotate;
         rb.angularVelocity = Vector3.zero;
@@ -258,7 +264,7 @@ public class SpaceShipController : Agent
         rotateInput = Vector2.zero;
         curMinerals = 0.0f;
         credits = 0.0f;
-        if (cargoUI != null)
+        if (cargoUI != null && shipId == 0)
         {
             cargoUI.SetCargo(0.0f);
             cargoUI.SetCredutValue(0.0f);
@@ -320,41 +326,48 @@ public class SpaceShipController : Agent
 
     void OnHelp()
     {
-        openHelp = !openHelp;
-        if (cargoUI != null) {
-            cargoUI.SetHelpEnabled(openHelp);
+        if (shipId == 0)
+        {
+            openHelp = !openHelp;
+            if (cargoUI != null)
+            {
+                cargoUI.SetHelpEnabled(openHelp);
+            }
         }
     }
 
     void OnHeuristic()
     {
-        if (behaviour.BehaviorType != Unity.MLAgents.Policies.BehaviorType.Default)
+        if (shipId == 0)
         {
-            if (behaviour.BehaviorType == Unity.MLAgents.Policies.BehaviorType.HeuristicOnly)
+            if (behaviour.BehaviorType != Unity.MLAgents.Policies.BehaviorType.Default)
             {
-                if (behaviour.Model != null)
+                if (behaviour.BehaviorType == Unity.MLAgents.Policies.BehaviorType.HeuristicOnly)
                 {
-                    decisionRequester.DecisionPeriod = 4;
-                    behaviour.BehaviorType = Unity.MLAgents.Policies.BehaviorType.InferenceOnly;
-                    cargoUI.SetModelControl(2);
+                    if (behaviour.Model != null)
+                    {
+                        decisionRequester.DecisionPeriod = 4;
+                        behaviour.BehaviorType = Unity.MLAgents.Policies.BehaviorType.InferenceOnly;
+                        cargoUI.SetModelControl(2);
+                    }
+                }
+                else
+                {
+                    decisionRequester.DecisionPeriod = 1;
+                    behaviour.BehaviorType = Unity.MLAgents.Policies.BehaviorType.HeuristicOnly;
+                    cargoUI.SetModelControl(1);
                 }
             }
             else
             {
-                decisionRequester.DecisionPeriod = 1;
-                behaviour.BehaviorType = Unity.MLAgents.Policies.BehaviorType.HeuristicOnly;
-                cargoUI.SetModelControl(1);
+                cargoUI.SetModelControl(0);
             }
-        }
-        else
-        {
-            cargoUI.SetModelControl(0);
         }
     }
 
     void OnReset()
     {
-        EndEpisode();
+        spaceManager.EndEpisodeAll();
     }
 
     IEnumerator SpawnTrail(TrailRenderer trail, float range, float maxRange)
@@ -377,7 +390,7 @@ public class SpaceShipController : Agent
     public void TakeMineral(float amount)
     {
         curMinerals = Mathf.Min(maxMinerals, curMinerals + amount);
-        if (cargoUI != null)
+        if (cargoUI != null && shipId == 0)
         {
             cargoUI.SetCargo(curMinerals);
         }
@@ -391,7 +404,7 @@ public class SpaceShipController : Agent
         AddReward(curMinerals / maxMinerals * sellPrice);
         credits += curMinerals * sellPrice;
         curMinerals = 0.0f;
-        if (cargoUI != null)
+        if (cargoUI != null && shipId == 0)
         {
             cargoUI.SetCargo(0.0f);
             cargoUI.SetCredutValue(credits);

@@ -195,7 +195,7 @@ class SpaceScalEnv(MultiAgentEnv, TaskSettableEnv):
         obs_spaces = {
             "SpaceScalvager": TupleSpace([
                 Box(float("-inf"), float("inf"), (4,)),
-                Box(float("-inf"), float("inf"), (32,)),
+                Box(float("-inf"), float("inf"), (35,)),
             ])
         }
 
