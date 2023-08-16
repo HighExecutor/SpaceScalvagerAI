@@ -10,14 +10,14 @@ ray.init(local_mode=False)
 
 args = argparse.Namespace
 args.env = "SpaceScalEnv"
-args.file_name = "E:\\Projects\\SpaceScalvagerAI\\SpaceScalvager\\Build\\SpaceScalvager.exe"
+args.file_name = "C:\\wspace\\builds\SpaceBuild\\SpaceScalvager.exe"
 # args.file_name = None
 args.from_checkpoint = None
 args.stop_iters = 999999
 args.stop_timesteps = 999999999
 args.stop_reward = 9999.0
 args.framework = "torch"
-args.num_workers = 4
+args.num_workers = 1
 args.no_graphics = False
 
 policies, policy_mapping_fn = SpaceScalEnv.get_policy_configs_for_game("SpaceScalvager")

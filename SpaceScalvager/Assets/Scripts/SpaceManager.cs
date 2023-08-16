@@ -14,7 +14,6 @@ public class SpaceManager : MonoBehaviour
     public GameObject meteorsObject;
     public GameObject mineralsObject;
     public GameObject mineralPrefab;
-    private SpaceShipController player;
     private SphereCollider boundaryTrigger;
     public GameObject initMeteor;
     private Vector3 initMeteorPos;
@@ -23,7 +22,6 @@ public class SpaceManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        player = GetComponentInChildren<SpaceShipController>();
         boundaryTrigger = GetComponent<SphereCollider>();
         initMeteorPos = initMeteor.transform.position;
     }
@@ -52,10 +50,10 @@ public class SpaceManager : MonoBehaviour
         GenerateMeteor();
     }
 
-    public void MineralTaken(GameObject mineral)
+    public void MineralTaken(GameObject mineral, SpaceShipController ship)
     {
         float amount = mineral.GetComponent<MineralScript>().amount;
-        player.TakeMineral(amount);
+        ship.TakeMineral(amount);
         Destroy(mineral.gameObject);
     }
 
@@ -69,11 +67,11 @@ public class SpaceManager : MonoBehaviour
         }
     }
 
-    public Dictionary<String, object> GetObservations()
+    public Dictionary<String, object> GetObservations(Vector3 shipPosition)
     {
         Dictionary<String, object> result = new Dictionary<String, object>();
-        result["gate"] = GetComponentInChildren<GateScript>().transform.position - player.transform.position;
-        result["meteorsPos"] = meteorsPosition.transform.position - player.transform.position;
+        result["gate"] = GetComponentInChildren<GateScript>().transform.position - shipPosition;
+        result["meteorsPos"] = meteorsPosition.transform.position - shipPosition;
 
         MeteorScript[] meteors = GetComponentsInChildren<MeteorScript>();
         result["meteorsNumber"] = (float)meteors.Length;
@@ -82,13 +80,13 @@ public class SpaceManager : MonoBehaviour
         {
             IEnumerable<Vector3> meteorsPositions = meteors.Select(x => x.transform.position);
             IEnumerator<Vector3> meteorsDistances =
-                meteorsPositions.OrderByDescending(x => Vector3.Distance(x, player.transform.position)).GetEnumerator();
+                meteorsPositions.OrderBy(x => Vector3.Distance(x, shipPosition)).GetEnumerator();
             meteorsDistances.MoveNext();
             int m = Mathf.Min(3, meteors.Length);
             while (m > 0)
             {
                 Vector3 pos = meteorsDistances.Current;
-                meteorsDists.Add(pos - player.transform.position);
+                meteorsDists.Add(pos - shipPosition);
                 meteorsDistances.MoveNext();
                 m--;
             }
@@ -102,14 +100,14 @@ public class SpaceManager : MonoBehaviour
         {
             IEnumerable<Vector3> mineralsPositions = minerals.Select(x => x.transform.position);
             IEnumerator<Vector3> mineralsDistances =
-                mineralsPositions.OrderByDescending(x => Vector3.Distance(x, player.transform.position))
+                mineralsPositions.OrderBy(x => Vector3.Distance(x, shipPosition))
                     .GetEnumerator();
             mineralsDistances.MoveNext();
             int m = Mathf.Min(3, minerals.Length);
             while (m > 0)
             {
                 Vector3 pos = mineralsDistances.Current;
-                mineralDists.Add(pos - player.transform.position);
+                mineralDists.Add(pos - shipPosition);
                 mineralsDistances.MoveNext();
                 m--;
             }

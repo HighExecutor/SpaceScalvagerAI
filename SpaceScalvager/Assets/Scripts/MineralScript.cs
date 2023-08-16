@@ -25,7 +25,7 @@ public class MineralScript : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             SpaceManager spaceManager = GetComponentInParent<SpaceManager>();
-            spaceManager.MineralTaken(gameObject);
+            spaceManager.MineralTaken(gameObject, other.GetComponent<SpaceShipController>());
         }
     }
 }

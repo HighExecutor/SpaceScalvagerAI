@@ -226,25 +226,25 @@ public class SpaceShipController : Agent
         sensor.AddObservation(transform.localRotation); // 4
         sensor.AddObservation(rb.velocity / velocity); // 3
         // sensor.AddObservation(rb.angularVelocity); // 3
-        Dictionary<String, object> spaceObservations = spaceManager.GetObservations();
+        Dictionary<String, object> spaceObservations = spaceManager.GetObservations(transform.position);
         sensor.AddObservation((Vector3)spaceObservations["gate"] / velocity); // 3
         List<Vector3> mineralsDists = (List<Vector3>)spaceObservations["mineralsDists"];
         List<Vector3> meteorsDists = (List<Vector3>)spaceObservations["meteorsDists"];
         sensor.AddObservation((float)spaceObservations["meteorsNumber"]); // 1
-        for (int i = 0; i < 1; i++)
+        for (int i = 0; i < 3; i++)
         {
             sensor.AddObservation(meteorsDists[i] / velocity);  // 3
             Debug.DrawLine(transform.position, transform.position + meteorsDists[i], Color.yellow);
         }
         sensor.AddObservation((float)spaceObservations["mineralsNumber"]); // 1
-        for (int i = 0; i < 1; i++)
+        for (int i = 0; i < 3; i++)
         {
             sensor.AddObservation(mineralsDists[i] / velocity); // 3
         }
         
         sensor.AddObservation(curShootCooldown); // 1
         sensor.AddObservation(curMinerals / maxMinerals); // 1
-        // Total obs: 20
+        // Total obs: 32
     }
 
     public override void OnEpisodeBegin()
