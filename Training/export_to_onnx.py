@@ -24,7 +24,7 @@ from space_env import SpaceScalEnv
 
 export_config = {
     "algorithm": "PPO",
-    "checkpoint_path": "C:\\Users\\mihai\\ray_results\\PPO\\PPO_SpaceScalEnv_2fe91_00000_0_2023-07-27_14-07-41\\checkpoint_000950",
+    "checkpoint_path": "C:\\Users\\mihai\\ray_results\\PPO\\PPO_SpaceScalEnv_8027d_00000_0_2023-08-17_12-19-08\\checkpoint_000100",
     "onnx_model_suffix": "-model-1.onnx",
     "policy_id": "SpaceScalvager",
     "model_config": {
@@ -50,7 +50,7 @@ export_config = {
 
 args = argparse.Namespace
 args.env = "SpaceScalEnv"
-args.file_name = "E:\\Projects\\SpaceScalvagerAI\\SpaceScalvager\\Build\\SpaceScalvager.exe"
+args.file_name = "E:\\Projects\\SpaceScalvagerAI\\SpaceScalvager\\Build\\Train\\SpaceScalvager.exe"
 args.stop_iters = 9999
 args.stop_timesteps = 99999999
 args.stop_reward = 9999.0
@@ -69,7 +69,7 @@ exp_config = (
         .framework(args.framework)
         .rollouts(
         num_rollout_workers=0,
-        rollout_fragment_length=1000,
+        rollout_fragment_length=2000,
         batch_mode="complete_episodes"
     )
         .training(
@@ -82,7 +82,7 @@ exp_config = (
         vf_loss_coeff=1.0,
         clip_param=0.2,
         entropy_coeff=0.02,
-        model={"fcnet_hiddens": [64, 64],
+        model={"fcnet_hiddens": [32, 32],
                "vf_share_layers": False},
     )
         .multi_agent(policies=policies, policy_mapping_fn=policy_mapping_fn)

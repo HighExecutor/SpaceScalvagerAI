@@ -36,7 +36,7 @@ public class SpaceShipController : Agent
     public float sellPrice;
     private float credits;
     public bool openHelp;
-    public int shipId = 0;
+    public int shipId;
 
     private Vector3 startPosition;
     private Quaternion startRotate;
@@ -54,6 +54,7 @@ public class SpaceShipController : Agent
         parts = GetComponentInChildren<ParticleSystem>();
         decisionRequester = GetComponent<DecisionRequester>();
         behaviour = GetComponent<Unity.MLAgents.Policies.BehaviorParameters>();
+        spaceManager = GetComponentInParent<SpaceManager>();
         body = transform.GetChild(0);
         curShootCooldown = 0.0f;
         canShoot = true;
@@ -74,11 +75,13 @@ public class SpaceShipController : Agent
             }
             cargoUI.SetModelControl(modelMode);
             cargoUI.SetHelpEnabled(openHelp);
+            cargoUI.SetTimestepsBar(StepCount, MaxStep);
+            spaceManager.UpdateStats();
         }
 
         startPosition = transform.position;
         startRotate = transform.rotation;
-        spaceManager = GetComponentInParent<SpaceManager>();
+        
         m_ResetParams = Academy.Instance.EnvironmentParameters;
     }
     
@@ -86,6 +89,9 @@ public class SpaceShipController : Agent
     {
         Move();
         UpdateCooldown();
+        if (cargoUI != null && shipId == 0) {
+            cargoUI.SetTimestepsBar(StepCount, MaxStep);
+        }
     }
 
     private void UpdateCooldown()
@@ -264,12 +270,7 @@ public class SpaceShipController : Agent
         rotateInput = Vector2.zero;
         curMinerals = 0.0f;
         credits = 0.0f;
-        if (cargoUI != null && shipId == 0)
-        {
-            cargoUI.SetCargo(0.0f);
-            cargoUI.SetCredutValue(0.0f);
-        }
-        
+
         int mMaxSteps = (int)m_ResetParams.GetWithDefault("max_steps", MaxStep);
         if (MaxStep != mMaxSteps)
         {
@@ -281,6 +282,14 @@ public class SpaceShipController : Agent
         {
             sellPrice = mSellPrice;
             Debug.Log("Cur sell_price = " + mSellPrice);
+        }
+
+        if (cargoUI != null && shipId == 0)
+        {
+            cargoUI.SetCargo(0.0f);
+            cargoUI.SetCredutValue(0.0f);
+            cargoUI.SetTimestepsBar(StepCount, MaxStep);
+            spaceManager.UpdateStats();
         }
     }
 
@@ -393,6 +402,9 @@ public class SpaceShipController : Agent
         if (cargoUI != null && shipId == 0)
         {
             cargoUI.SetCargo(curMinerals);
+        } else
+        {
+            spaceManager.UpdateStats();
         }
 
         AddReward(0.1f);
@@ -408,6 +420,9 @@ public class SpaceShipController : Agent
         {
             cargoUI.SetCargo(0.0f);
             cargoUI.SetCredutValue(credits);
+        } else
+        {
+            spaceManager.UpdateStats();
         }
     }
 
@@ -420,5 +435,14 @@ public class SpaceShipController : Agent
     {
         MaxStep = maxSteps;
     }
-    
+
+    public int GetCurCargo()
+    {
+        return (int)curMinerals;
+    }
+
+    public int GetCurCredits()
+    {
+        return (int)credits;
+    }    
 }

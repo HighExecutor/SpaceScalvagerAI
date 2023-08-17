@@ -40,7 +40,7 @@ config = (
     .framework(args.framework)
     .rollouts(
         num_rollout_workers=args.num_workers if args.file_name else 0,
-        rollout_fragment_length=1000,
+        rollout_fragment_length=2000,
         batch_mode="complete_episodes"
     )
     .training(
@@ -53,7 +53,7 @@ config = (
         vf_loss_coeff=1.0,
         clip_param=0.2,
         entropy_coeff=0.02,
-        model={"fcnet_hiddens": [64, 64],
+        model={"fcnet_hiddens": [32, 32],
                "vf_share_layers": False},
     )
     .multi_agent(policies=policies, policy_mapping_fn=policy_mapping_fn)

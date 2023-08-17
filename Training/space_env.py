@@ -26,7 +26,6 @@ class SpaceScalEnv(MultiAgentEnv, TaskSettableEnv):
                  seed: int = 0,
                  no_graphics: bool = False,
                  timeout_wait: int = 300,
-                 episode_horizon: int = 200,
                  curriculum_config=None,
                  additional_args: List[str] = None,
                  ):
@@ -79,8 +78,6 @@ class SpaceScalEnv(MultiAgentEnv, TaskSettableEnv):
         self.api_version = self.unity_env.API_VERSION.split(".")
         self.api_version = [int(s) for s in self.api_version]
 
-        # Reset entire env every this number of step calls.
-        self.episode_horizon = episode_horizon
         # Keep track of how many times we have called `step` so far.
         self.episode_timesteps = 0
         # Curriculum
@@ -120,14 +117,6 @@ class SpaceScalEnv(MultiAgentEnv, TaskSettableEnv):
         # Global horizon reached? -> Return __all__ done=True, so user
         # can reset. Set all agents' individual `done` to True as well.
         self.episode_timesteps += 1
-        if self.episode_timesteps > self.episode_horizon:
-            return (
-                obs,
-                rewards,
-                dict({"__all__": True}, **{agent_id: True for agent_id in all_agents}),
-                infos,
-            )
-
         return obs, rewards, dones, infos
 
     def reset(self) -> MultiAgentDict:

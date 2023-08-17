@@ -12,6 +12,9 @@ public class CargoUIScript : MonoBehaviour
     public TextMeshProUGUI credits;
     public TextMeshProUGUI modelControl;
     public TextMeshProUGUI controlsHelp;
+    public TextMeshProUGUI timestampBar;
+    public TextMeshProUGUI statsNamesBar;
+    public TextMeshProUGUI statsResultBar;
 
 
     public void SetMaxCargo(int maxCargo)
@@ -55,5 +58,43 @@ public class CargoUIScript : MonoBehaviour
     public void SetHelpEnabled(bool openHelp)
     {
         controlsHelp.gameObject.SetActive(openHelp);
+    }
+
+    public void SetTimestepsBar(int curStep, int maxStep)
+    {
+        string result = "" + curStep;
+        if (maxStep > 0)
+        {
+            result += " / " + maxStep;
+        }
+        timestampBar.SetText(result);
+    }
+
+    public void SetShipsNames(string[] shipsNames)
+    {
+        string ids = "";
+        for (int i = 0; i < shipsNames.Length; i++)
+        {
+            ids += shipsNames[i];
+            if (i < shipsNames.Length - 1)
+            {
+                ids += "\n";
+            }
+        }
+        statsNamesBar.SetText(ids);
+    }
+
+    public void SetStats(int[] cargos, int[] credits)
+    {
+        string values = "";
+        for (int i = 0; i < cargos.Length; i++)
+        {
+            values += credits[i] + "|" + cargos[i];
+            if (i < cargos.Length -1)
+            {
+                values += "\n";
+            }
+        }
+        statsResultBar.SetText(values);
     }
 }

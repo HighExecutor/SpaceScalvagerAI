@@ -19,12 +19,26 @@ public class SpaceManager : MonoBehaviour
     private Vector3 initMeteorPos;
     public int initMeteorsNumber;
     public SpaceShipController[] ships;
+    public CargoUIScript cargoUI;
     
     // Start is called before the first frame update
     void Start()
     {
         boundaryTrigger = GetComponent<SphereCollider>();
         initMeteorPos = initMeteor.transform.position;
+        string[] shipNames = new string[ships.Length - 1];
+        int j = 0;
+        for (int i = 0; i < ships.Length; i++)
+        {
+            if (ships[0].shipId != 0)
+            {
+                shipNames[j] = "Ship " + ships[i].shipId;
+                ships[i].SetMaxStep(ships[0].MaxStep);
+                j++;
+            }
+            
+        }
+        cargoUI.SetShipsNames(shipNames);
     }
 
     // Update is called once per frame
@@ -183,5 +197,22 @@ public class SpaceManager : MonoBehaviour
         {
             ships[i].EndEpisode();
         }
+    }
+
+    public void UpdateStats()
+    {
+        int[] shipCargos = new int[ships.Length - 1];
+        int[] shipCredits = new int[ships.Length - 1];
+        int j = 0;
+        for (int i = 0; i < ships.Length; i++)
+        {
+            if (i != 0)
+            {
+                shipCargos[j] = ships[i].GetCurCargo();
+                shipCredits[j] = ships[i].GetCurCredits();
+                j++;
+            }
+        }
+        cargoUI.SetStats(shipCargos, shipCredits);
     }
 }
