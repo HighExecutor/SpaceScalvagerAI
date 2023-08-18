@@ -194,15 +194,19 @@ public class SpaceManager : MonoBehaviour
         }
     }
 
-    public void UpdateStats()
+    public void UpdateStats(bool reset)
     {
         int[] shipCargos = new int[ships.Length - 1];
         int[] shipCredits = new int[ships.Length - 1];
-        for (int i = 1; i < ships.Length; i++)
+        if (!reset)
         {
-            shipCargos[i-1] = ships[i].GetCurCargo();
-            shipCredits[i-1] = ships[i].GetCurCredits();
+            for (int i = 1; i < ships.Length; i++)
+            {
+                shipCargos[i - 1] = ships[i].GetCurCargo();
+                shipCredits[i - 1] = ships[i].GetCurCredits();
+            }
         }
+
         cargoUI.SetStats(shipCargos, shipCredits);
     }
 }

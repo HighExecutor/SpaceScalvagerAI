@@ -76,7 +76,7 @@ public class SpaceShipController : Agent
             cargoUI.SetModelControl(modelMode);
             cargoUI.SetHelpEnabled(openHelp);
             cargoUI.SetTimestepsBar(StepCount, MaxStep);
-            spaceManager.UpdateStats();
+            spaceManager.UpdateStats(true);
         }
 
         startPosition = transform.position;
@@ -289,7 +289,7 @@ public class SpaceShipController : Agent
             cargoUI.SetCargo(0.0f);
             cargoUI.SetCredutValue(0.0f);
             cargoUI.SetTimestepsBar(StepCount, MaxStep);
-            spaceManager.UpdateStats();
+            spaceManager.UpdateStats(true);
         }
     }
 
@@ -404,7 +404,7 @@ public class SpaceShipController : Agent
             cargoUI.SetCargo(curMinerals);
         } else
         {
-            spaceManager.UpdateStats();
+            spaceManager.UpdateStats(false);
         }
 
         AddReward(0.1f);
@@ -422,7 +422,7 @@ public class SpaceShipController : Agent
             cargoUI.SetCredutValue(credits);
         } else
         {
-            spaceManager.UpdateStats();
+            spaceManager.UpdateStats(false);
         }
     }
 
