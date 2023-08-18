@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
+using TMPro;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
@@ -45,6 +46,7 @@ public class SpaceShipController : Agent
     private Unity.MLAgents.Policies.BehaviorParameters behaviour;
 
     private EnvironmentParameters m_ResetParams;
+    private TextMeshPro shipIDText;
 
 
     // Start is called before the first frame update
@@ -55,6 +57,8 @@ public class SpaceShipController : Agent
         decisionRequester = GetComponent<DecisionRequester>();
         behaviour = GetComponent<Unity.MLAgents.Policies.BehaviorParameters>();
         spaceManager = GetComponentInParent<SpaceManager>();
+        shipIDText = GetComponentInChildren<TextMeshPro>();
+        shipIDText.SetText("Ship " + shipId);
         body = transform.GetChild(0);
         curShootCooldown = 0.0f;
         canShoot = true;
