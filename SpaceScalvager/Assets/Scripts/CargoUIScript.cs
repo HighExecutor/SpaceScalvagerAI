@@ -15,6 +15,7 @@ public class CargoUIScript : MonoBehaviour
     public TextMeshProUGUI timestampBar;
     public TextMeshProUGUI statsNamesBar;
     public TextMeshProUGUI statsResultBar;
+    public TextMeshProUGUI statsCargoBar;
 
 
     public void SetMaxCargo(int maxCargo)
@@ -87,14 +88,18 @@ public class CargoUIScript : MonoBehaviour
     public void SetStats(int[] cargos, int[] credits)
     {
         string values = "";
+        string cargValues = "";
         for (int i = 0; i < cargos.Length; i++)
         {
-            values += credits[i] + "|" + cargos[i];
+            values += credits[i];
+            cargValues += cargos[i];
             if (i < cargos.Length -1)
             {
                 values += "\n";
+                cargValues += "\n";
             }
         }
         statsResultBar.SetText(values);
+        statsCargoBar.SetText(cargValues);
     }
 }
