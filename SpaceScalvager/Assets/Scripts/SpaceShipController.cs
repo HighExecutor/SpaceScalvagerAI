@@ -96,103 +96,7 @@ public class SpaceShipController : Agent
         if (cargoUI != null && shipId == 0) {
             cargoUI.SetTimestepsBar(StepCount, MaxStep);
         }
-    }
-
-    private void UpdateCooldown()
-    {
-        if (curShootCooldown > 0)
-        {
-            curShootCooldown -= Time.fixedDeltaTime;
-            if (curShootCooldown <= 0)
-            {
-                canShoot = true;
-                curShootCooldown = 0.0f;
-            }
-        }
-    }
-
-    private void Move()
-    {
-        // move
-        if (movementInput != Vector3.zero)
-        {
-            Vector3 forward = transform.forward * movementInput.z;
-            Vector3 left = transform.right * movementInput.x;
-            Vector3 up = transform.up * movementInput.y;
-            Vector3 moveVector = (forward + left + up);
-            rb.AddForce(moveVector * velocity * Time.fixedDeltaTime);
-            
-        }
-        float bodyAngle = body.rotation.eulerAngles.z;
-        if (bodyAngle > 180)
-        {
-            bodyAngle -= 360;
-        }
-        if (bodyAngle < -180)
-        {
-            bodyAngle += 360;
-        }
-        if (movementInput.x != 0)
-        {
-            bodyAngle -= Mathf.Sign(movementInput.x) * 35 * Time.fixedDeltaTime;
-            bodyAngle = Mathf.Clamp(bodyAngle, -15, 15);
-            body.rotation = Quaternion.Euler(body.rotation.eulerAngles.x, body.rotation.eulerAngles.y, bodyAngle);
-        } else if (body.rotation.eulerAngles.z != 0)
-        {
-            bodyAngle -= Mathf.Sign(bodyAngle) * 35 * Time.fixedDeltaTime;
-            bodyAngle = Mathf.Clamp(bodyAngle, -15, 15);
-            if (Mathf.Abs(bodyAngle) < 2)
-            {
-                bodyAngle = 0;
-            }
-            body.rotation = Quaternion.Euler(body.rotation.eulerAngles.x, body.rotation.eulerAngles.y, bodyAngle);
-        }
-        if (movementInput.z > 0 && !parts.isPlaying)
-        {
-            parts.Play();
-        }
-        else if (parts.isPlaying)
-        {
-            parts.Pause();
-            parts.Clear();
-        }
-
-        Vector3 curRotation = transform.rotation.eulerAngles;
-        if (curRotation.x > 180)
-        {
-            curRotation.x -= 360;
-        }
-        if (curRotation.x < -180)
-        {
-            curRotation.x += 360;
-        } 
-        if (rotateInput.x != 0 || rotateInput.y != 0 || curRotation.z != 0)
-        {
-            float horAngle = curRotation.y + rotateInput.x * angularVelocity * Time.fixedDeltaTime;
-            float vertAngle = curRotation.x + rotateInput.y * angularVelocity * Time.fixedDeltaTime;
-            vertAngle = Mathf.Clamp(vertAngle, -45.0f, 45.0f);
-            float diagAngle = curRotation.z;
-            if (diagAngle != 0)
-            {
-                if (diagAngle > 180)
-                {
-                    diagAngle -= 360;
-                }
-
-                if (diagAngle < -180)
-                {
-                    diagAngle += 360;
-                }
-
-                diagAngle -= Mathf.Sign(diagAngle) * angularVelocity * Time.fixedDeltaTime;
-                if (Mathf.Abs(diagAngle) < 2)
-                {
-                    diagAngle = 0;
-                }
-            }
-            transform.rotation = Quaternion.Euler(vertAngle, horAngle, diagAngle);
-        }
-    }
+    }            
     
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
@@ -262,25 +166,23 @@ public class SpaceShipController : Agent
 
     public override void OnEpisodeBegin()
     {
+        Debug.Log("Episode START: shipd " + shipId);
+        
         if (shipId == 0)
         {
-            spaceManager.Reset();
-        }
-        transform.position = startPosition;
-        transform.rotation = startRotate;
-        rb.angularVelocity = Vector3.zero;
-        rb.velocity = Vector3.zero;
-        movementInput = Vector3.zero;
-        rotateInput = Vector2.zero;
-        curMinerals = 0.0f;
+            int mMaxSteps = (int)m_ResetParams.GetWithDefault("max_steps", MaxStep);
+            if (MaxStep != mMaxSteps)
+            {
+                SetMaxStep(mMaxSteps);
+                Debug.Log("Cur max_steps = " + mMaxSteps);
+            }
+            Time.timeScale = (int)m_ResetParams.GetWithDefault("time_scale", Time.timeScale);
+            // Reset all ships first
+            spaceManager.ResetTransformAll();
+            // Reset meteors and minerals in space
+            spaceManager.ResetSpace();
+        }        
         credits = 0.0f;
-
-        int mMaxSteps = (int)m_ResetParams.GetWithDefault("max_steps", MaxStep);
-        if (MaxStep != mMaxSteps)
-        {
-            SetMaxStep(mMaxSteps);
-            Debug.Log("Cur max_steps = " + mMaxSteps);
-        }
         float mSellPrice = m_ResetParams.GetWithDefault("sell_price", sellPrice);
         if (sellPrice != mSellPrice)
         {
@@ -297,6 +199,105 @@ public class SpaceShipController : Agent
         }
     }
 
+    public void ResetTransform()
+    {
+        transform.position = startPosition;
+        transform.rotation = startRotate;
+        rb.angularVelocity = Vector3.zero;
+        rb.velocity = Vector3.zero;
+        movementInput = Vector3.zero;
+        rotateInput = Vector2.zero;
+        curMinerals = 0.0f;
+        if (cargoUI != null && shipId == 0)
+        {
+            cargoUI.SetCargo(0.0f);
+        }
+    }
+
+    private void Move()
+    {
+        // move
+        if (movementInput != Vector3.zero)
+        {
+            Vector3 forward = transform.forward * movementInput.z;
+            Vector3 left = transform.right * movementInput.x;
+            Vector3 up = transform.up * movementInput.y;
+            Vector3 moveVector = (forward + left + up);
+            rb.AddForce(moveVector * velocity * Time.fixedDeltaTime);
+
+        }
+        float bodyAngle = body.rotation.eulerAngles.z;
+        if (bodyAngle > 180)
+        {
+            bodyAngle -= 360;
+        }
+        if (bodyAngle < -180)
+        {
+            bodyAngle += 360;
+        }
+        if (movementInput.x != 0)
+        {
+            bodyAngle -= Mathf.Sign(movementInput.x) * 35 * Time.fixedDeltaTime;
+            bodyAngle = Mathf.Clamp(bodyAngle, -15, 15);
+            body.rotation = Quaternion.Euler(body.rotation.eulerAngles.x, body.rotation.eulerAngles.y, bodyAngle);
+        }
+        else if (body.rotation.eulerAngles.z != 0)
+        {
+            bodyAngle -= Mathf.Sign(bodyAngle) * 35 * Time.fixedDeltaTime;
+            bodyAngle = Mathf.Clamp(bodyAngle, -15, 15);
+            if (Mathf.Abs(bodyAngle) < 2)
+            {
+                bodyAngle = 0;
+            }
+            body.rotation = Quaternion.Euler(body.rotation.eulerAngles.x, body.rotation.eulerAngles.y, bodyAngle);
+        }
+        if (movementInput.z > 0 && !parts.isPlaying)
+        {
+            parts.Play();
+        }
+        else if (parts.isPlaying)
+        {
+            parts.Pause();
+            parts.Clear();
+        }
+
+        Vector3 curRotation = transform.rotation.eulerAngles;
+        if (curRotation.x > 180)
+        {
+            curRotation.x -= 360;
+        }
+        if (curRotation.x < -180)
+        {
+            curRotation.x += 360;
+        }
+        if (rotateInput.x != 0 || rotateInput.y != 0 || curRotation.z != 0)
+        {
+            float horAngle = curRotation.y + rotateInput.x * angularVelocity * Time.fixedDeltaTime;
+            float vertAngle = curRotation.x + rotateInput.y * angularVelocity * Time.fixedDeltaTime;
+            vertAngle = Mathf.Clamp(vertAngle, -45.0f, 45.0f);
+            float diagAngle = curRotation.z;
+            if (diagAngle != 0)
+            {
+                if (diagAngle > 180)
+                {
+                    diagAngle -= 360;
+                }
+
+                if (diagAngle < -180)
+                {
+                    diagAngle += 360;
+                }
+
+                diagAngle -= Mathf.Sign(diagAngle) * angularVelocity * Time.fixedDeltaTime;
+                if (Mathf.Abs(diagAngle) < 2)
+                {
+                    diagAngle = 0;
+                }
+            }
+            transform.rotation = Quaternion.Euler(vertAngle, horAngle, diagAngle);
+        }
+    }
+
     void OnMove(InputValue inputValue)
     {
         movementInput = inputValue.Get<Vector3>();
@@ -309,6 +310,7 @@ public class SpaceShipController : Agent
 
     void OnShoot()
     {
+        // trigger raycast and start trail animation
         if (canShoot)
         {
             Vector3 direction = transform.forward.normalized;
@@ -334,6 +336,18 @@ public class SpaceShipController : Agent
             }
             canShoot = false;
             curShootCooldown = shootCooldown;
+        }
+    }
+    private void UpdateCooldown()
+    {
+        if (curShootCooldown > 0)
+        {
+            curShootCooldown -= Time.fixedDeltaTime;
+            if (curShootCooldown <= 0)
+            {
+                canShoot = true;
+                curShootCooldown = 0.0f;
+            }
         }
     }
 
@@ -373,7 +387,11 @@ public class SpaceShipController : Agent
             }
             else
             {
-                cargoUI.SetModelControl(0);
+                // cargoUI.SetModelControl(0);
+                // Start with default but if change then go to heuristics
+                decisionRequester.DecisionPeriod = 1;
+                behaviour.BehaviorType = Unity.MLAgents.Policies.BehaviorType.HeuristicOnly;
+                cargoUI.SetModelControl(1);
             }
         }
     }

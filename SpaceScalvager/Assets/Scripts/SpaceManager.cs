@@ -29,7 +29,7 @@ public class SpaceManager : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         
     }
@@ -61,11 +61,13 @@ public class SpaceManager : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
+        // Reset position and lose cargo when went outside of space system
         if (other.CompareTag("Player"))
         {
+            Debug.Log("Ship exited space bounds");
             SpaceShipController player = other.GetComponent<SpaceShipController>();
             player.AddCustomReward(-1.0f);
-            player.EndEpisode();
+            player.ResetTransform();
         }
     }
 
@@ -151,8 +153,10 @@ public class SpaceManager : MonoBehaviour
         return result;
     }
 
-    public void Reset()
+    public void ResetSpace()
     {
+        // Reset all meteors and minerals
+        Debug.Log("Space reset");
         MineralScript[] minerals = mineralsObject.GetComponentsInChildren<MineralScript>();
         foreach (var mn in minerals)
         {
@@ -160,14 +164,23 @@ public class SpaceManager : MonoBehaviour
         }
         
         MeteorScript[] m = meteorsObject.GetComponentsInChildren<MeteorScript>();
-        int add = initMeteorsNumber - m.Length;
-        if (add > 0)
+        int mineralsDiff = initMeteorsNumber - m.Length;
+        if (mineralsDiff > 0)
         {
-            for (int i = 0; i < add; i++)
+            for (int i = 0; i < mineralsDiff; i++)
             {
                 GenerateMeteor();
             }
         }
+        if (mineralsDiff < 0)
+        {
+            for (int i = 0; i < -mineralsDiff; i++)
+            {
+                Destroy(m[m.Length - i - 1].gameObject);
+            }
+        } 
+        m = meteorsObject.GetComponentsInChildren<MeteorScript>();
+        Debug.Log("Meteors after reset: " + m.Length);
 
         MeteorScript m0 = m[0];
         m0.transform.position = initMeteorPos;
@@ -190,7 +203,17 @@ public class SpaceManager : MonoBehaviour
     {
         for (int i = 0; i < ships.Length; i++)
         {
+            Debug.Log("End episode for ship " + i);
             ships[i].EndEpisode();
+        }
+    }
+
+    public void ResetTransformAll()
+    {
+        for (int i = 0; i < ships.Length; i++)
+        {
+            Debug.Log("Reset ship " + i);
+            ships[i].ResetTransform();
         }
     }
 

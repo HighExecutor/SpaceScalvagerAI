@@ -72,9 +72,12 @@ curriculum_config = {
 single_task = {
     0: {
         "name": "initial",
-        "mean_reward": 0.3,
+        "mean_reward": 0.0,
         "env_args": {
-            "max_steps": 0
+            "max_steps": 5000,
+            "time_scale": 20
         }
     }
 }
+
+default_task = {}

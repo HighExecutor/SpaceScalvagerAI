@@ -1,7 +1,7 @@
 import numpy as np
 import time
 import random
-from gym.spaces import Box, MultiDiscrete, Tuple as TupleSpace
+from gymnasium.spaces import Box, MultiDiscrete, Tuple as TupleSpace
 from typing import Callable, Optional, Tuple, List, Dict
 
 from ray.rllib.env.multi_agent_env import MultiAgentEnv
@@ -14,7 +14,7 @@ from mlagents_envs.side_channel.environment_parameters_channel import Environmen
 
 class SpaceScalEnv(MultiAgentEnv, TaskSettableEnv):
     # Default base port when connecting directly to the Editor
-    _BASE_PORT_EDITOR = 5105
+    _BASE_PORT_EDITOR = 5004
     # Default base port when connecting to a compiled environment
     _BASE_PORT_ENVIRONMENT = 5106
     # The worker_id for each environment instance
@@ -22,6 +22,7 @@ class SpaceScalEnv(MultiAgentEnv, TaskSettableEnv):
 
     def __init__(self, env_name: str = "SpaceScalEnv",
                  file_name: str = None,
+                 time_scale: int = 1,
                  port: Optional[int] = None,
                  seed: int = 0,
                  no_graphics: bool = False,
@@ -57,6 +58,7 @@ class SpaceScalEnv(MultiAgentEnv, TaskSettableEnv):
             worker_id_ = SpaceScalEnv._WORKER_ID if file_name else 0
             SpaceScalEnv._WORKER_ID += 1
             self.environment_parameters_side_channel = EnvironmentParametersChannel()
+            self.environment_parameters_side_channel.set_float_parameter("time_scale", time_scale)
             try:
                 self.unity_env = UnityEnvironment(
                     file_name=file_name,
@@ -98,6 +100,8 @@ class SpaceScalEnv(MultiAgentEnv, TaskSettableEnv):
                 for agent_id in self.unity_env.get_steps(behavior_name)[0].agent_id:
                     key = behavior_name + "_{}".format(agent_id)
                     all_agents.append(key)
+                    if key not in action_dict:
+                        action_dict[key] = np.zeros(6, dtype=np.int64)
                     actions.append(action_dict[key])
                 if actions:
                     if isinstance(actions[0], Tuple):
@@ -203,6 +207,10 @@ class SpaceScalEnv(MultiAgentEnv, TaskSettableEnv):
             return game_name
 
         return policies, policy_mapping_fn
+
+    @staticmethod
+    def get_policy_name():
+        return "SpaceScalvager"
 
     # Curriculum
     def setup_curriculum_config(self):
