@@ -40,7 +40,7 @@ export_config = {
 
 def model_forward(original_model: nn.Module, inputs: torch.Tensor) -> torch.Tensor:
     """
-        Forward pass through the FCNet model with continuous actions for Xuen.
+        Forward pass through the FCNet model.
     """
     # Get features by passing inputs through hidden layers.
     original_model._features = original_model._hidden_layers(inputs)
