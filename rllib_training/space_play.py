@@ -19,9 +19,10 @@ tune.register_env(
     lambda c: SpaceScalEnv(file_name=c["file_name"], no_graphics=c["no_graphics"]),
 )
 
-checkpoint_path = "C:\\Users\\mihai\\ray_results\\PPO\\PPO_SpaceScalEnv_8b617_00000_0_2024-02-21_15-21-46\\checkpoint_002850"
-# checkpoint_path = "C:\\Users\\mihai\\ray_results\\PPO\\PPO_SpaceScalEnv_e3b3f_00000_0_2024-02-18_21-40-02\\checkpoint_001550"
-# checkpoint_path = "C:\\Users\\mihai\\ray_results\\PPO\\PPO_SpaceScalEnv_ceb5b_00000_0_2024-02-16_18-28-32\checkpoint_000650"
+base_dir = "E:\wspace\\rl_tutorial\\rllib_results\\"
+# checkpoint_path = "<exp_series>\\<PPO>\\<run_name>\<checkpoint_xxxxxx>"
+checkpoint_path = "PPO\\PPO_unity3d_2ae30_00000_0_2024-03-02_18-34-48\checkpoint_000075"
+checkpoint_path = os.path.join(base_dir, checkpoint_path)
 
 exp_config = read_config(checkpoint_path)['config']
 exp_config['num_workers'] = 0

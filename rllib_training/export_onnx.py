@@ -15,19 +15,17 @@ from utils.config_reader import read_config, read_yaml
 from utils.env_helper import register_envs
 from ray.rllib.algorithms.ppo import PPO
 
-# base_dir = ".\\rllib_results\\"
+base_dir = "E:\wspace\\rl_tutorial\\rllib_results\\"
 # checkpoint_path = "<exp_series>\\<PPO>\\<run_name>\<checkpoint_xxxxxx>"
-# checkpoint_path = "C:\\Users\\mihai\\ray_results\\PPO\\PPO_SpaceScalEnv_8b617_00000_0_2024-02-21_15-21-46\\checkpoint_002850"
-checkpoint_path = "E:\wspace\\rl_tutorial\\rllib_results\\PPO\\PPO_unity3d_2ae30_00000_0_2024-03-02_18-34-48\checkpoint_000075"
+checkpoint_path = "PPO\\PPO_unity3d_2ae30_00000_0_2024-03-02_18-34-48\checkpoint_000075"
 # file_name = None  # specify path if checkpoint is trained on another build
-# file_name = "E:\\Projects\\SpaceScalvagerAI\\SpaceScalvager\\Build\\Train\\SpaceScalvager.exe"
-file_name = "E:\wspace\\rl_tutorial\\builds\\3dball\\UnityEnvironment.exe"
+file_name = "E:\\Projects\\SpaceScalvagerAI\\SpaceScalvager\\Build\\Train\\SpaceScalvager.exe"
+# file_name = "E:\wspace\\rl_tutorial\\builds\\3dball\\UnityEnvironment.exe"
 
 export_config = {
     "algorithm": "PPO",
     "policy_id": "3DBall",
-    # "checkpoint_path": os.path.join(base_dir, checkpoint_path),
-    "checkpoint_path": checkpoint_path,
+    "checkpoint_path": os.path.join(base_dir, checkpoint_path),
     "onnx_model_suffix": ".onnx",
     "model_config": {},
     "env_config": {
