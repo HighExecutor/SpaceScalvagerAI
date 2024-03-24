@@ -29,7 +29,7 @@ memory_size = 0
 checkpoint_path = os.path.join(base_dir, checkpoint_path)
 onnx_model_suffix = ".onnx"
 
-discrete_actions = [3, 3, 3, 3, 2]
+discrete_actions = np.array([3, 3, 3, 3, 3, 2])
 
 input_names = ["obs_0", "obs_1" "action_masks"]
 output_names = ["discrete_actions", "version_number", "memory_size",
@@ -81,10 +81,10 @@ class RLLibTorchModelWrapper(nn.Module):
             Run a forward pass through the wrapped model.
         """
         # Get action prediction distributions from model.
-        logits = self.model_forward_method(self.original_model, inputs[0])
+        logits = self.rllib_model_forward(inputs[0])
         # Sample actions from distributions.
         mask = inputs[1] if len(inputs) > 1 else None
-        sampled_disc = self.action_distribution_sampler(logits, self.config, mask)
+        sampled_disc = self.action_distribution_sampler(logits, discrete_actions, mask)
 
         results = [sampled_disc, self.version_number, self.memory_size_vector, self.discrete_act_size_vector]
         return tuple(results)
@@ -130,14 +130,14 @@ def export_onnx_model_from_rllib_checkpoint() -> None:
         Export the RLLib model as an MLAgents-compatible ONNX model.
     """
     # Create checkpoint and ONNX model output paths.
-    onnx_out_path = checkpoint_path + "onnx_model_suffix"
+    onnx_out_path = checkpoint_path + onnx_model_suffix
     experiment_config = read_config(checkpoint_path)
     experiment_config['config']['num_rollout_workers'] = 0
     register_envs(experiment_config)
 
     algorithm = PPO(experiment_config['config'])
     policy_id = SpaceScalEnv.get_policy_name()
-    algorithm.load_checkpoint(checkpoint=checkpoint_path)
+    algorithm.load_checkpoint(checkpoint_path)
     policy = algorithm.get_policy(policy_id)
     print("Exporting policy:", policy_id, "\n\tfrom:\n", checkpoint_path, "\n\tto:\n", onnx_out_path)
 
