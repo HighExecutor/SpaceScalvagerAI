@@ -25,13 +25,16 @@ export_params = True
 opset_version = 9
 version_number = 3
 memory_size = 0
+behaviour = "SpaceScalvager"
 
 checkpoint_path = os.path.join(base_dir, checkpoint_path)
 onnx_model_suffix = ".onnx"
 
-discrete_actions = np.array([3, 3, 3, 3, 3, 2])
+policy_spec = SpaceScalEnv.get_policy_configs_for_game(behaviour)[0][behaviour]
+obs_space = policy_spec.observation_space
+discrete_actions = policy_spec.action_space.nvec
 
-input_names = ["obs_0", "obs_1" "action_masks"]
+input_names = ["obs_0", "obs_1", "action_masks"]
 output_names = ["discrete_actions", "version_number", "memory_size",
                 "discrete_action_output_shape"]
 
@@ -81,7 +84,8 @@ class RLLibTorchModelWrapper(nn.Module):
             Run a forward pass through the wrapped model.
         """
         # Get action prediction distributions from model.
-        logits = self.rllib_model_forward(inputs[0])
+        model_input = torch.concatenate(inputs[0], 1)
+        logits = self.rllib_model_forward(model_input)
         # Sample actions from distributions.
         mask = inputs[1] if len(inputs) > 1 else None
         sampled_disc = self.action_distribution_sampler(logits, discrete_actions, mask)
@@ -95,16 +99,13 @@ def generate_sample_mask():
     return torch.ones([1, discrete_size]).cuda()
 
 
-def get_sample_inputs_from_policy(policy: Policy) -> torch.Tensor:
+def get_sample_inputs_from_policy() -> List[torch.Tensor]:
     """
         Generate a batch of dummy data for use in model tracing with ONNX exporter.
     """
-    # Sample from the policy's observation space.
-    test_data = policy.observation_space.sample()
-    # Get it into the correct shape.
-    test_data = np.expand_dims(test_data, axis=0)
-    # Create torch tensor with input data.
-    return torch.tensor(test_data).cuda()
+    test_data = obs_space.sample()
+    test_data = [torch.tensor(np.expand_dims(d, axis=0)).cuda() for d in test_data]
+    return test_data
 
 
 def export_onnx_model(model: nn.Module, sample_data: torch.Tensor, onnx_export_path: str, export_params: bool,
@@ -148,10 +149,9 @@ def export_onnx_model_from_rllib_checkpoint() -> None:
     # Get wrapped model.
     mlagents_model = RLLibTorchModelWrapper(model, sampling_method)
     # Get sample inputs for tracing model.
-    sample_obs = get_sample_inputs_from_policy(policy)
+    sample_obs = get_sample_inputs_from_policy()
     sample_mask = generate_sample_mask()
     sample_inputs = (sample_obs, sample_mask)
-    # Get export params and opset version for ONNX export settings.
     # Create list of input names, output names, and make the appropriate axes dynamic.
     dynamic_axes = {name: {0: "batch"} for name in input_names}
     dynamic_axes.update({name: {0: "batch"} for name in output_names})
