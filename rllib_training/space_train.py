@@ -6,18 +6,20 @@ from ray.rllib.algorithms.ppo import PPO, PPOConfig
 from space_env import SpaceScalEnv
 from curriculum import curriculum_config, curriculum_fn, CurriculumCallback, single_task, default_task
 
-ray.init(local_mode=False)
+local_mode = False
+ray.init(local_mode=local_mode)
 
 args = argparse.Namespace
 args.env = "SpaceScalEnv"
-args.file_name = "E:\\Projects\\SpaceScalvagerAI\\SpaceScalvager\\Build\\Train\\SpaceScalvager.exe"
+args.file_name = "E:\\wspace\\rl_tutorial\\builds\\SpaceScalvager\\SpaceScalvager.exe"
+result_dir = "E:\\wspace\\rl_tutorial\\rllib_results\\"
 # args.file_name = None
 args.from_checkpoint = None
 args.stop_iters = 999999
 args.stop_timesteps = 999999999
 args.stop_reward = 9999.0
 args.framework = "torch"
-args.num_workers = 4
+args.num_workers = 4 if not local_mode else 0
 args.no_graphics = False
 args.time_scale = 20
 
@@ -74,8 +76,9 @@ tune.run(
     stop=stop,
     verbose=3,
     checkpoint_freq=50,
-    checkpoint_at_end=False,
-    # restore="C:\\Users\\mihai\\ray_results\\PPO\\PPO_SpaceScalEnv_0547d_00000_0_2024-02-20_18-25-19\\checkpoint_002340"
+    checkpoint_at_end=True,
+    storage_path=result_dir,
+    # restore="checkpoint_path"
 )
 
 ray.shutdown()

@@ -5,7 +5,7 @@ from ray.rllib.env.wrappers.unity3d_env import Unity3DEnv
 
 def register_envs(experiment_config):
     from ray import tune
-    if experiment_config["config"]["env"] == "SpaceScalvager":
+    if experiment_config["config"]["env"] == "SpaceScalEnv":
         env_class = SpaceScalEnv
     else:
         env_class = Unity3DEnv

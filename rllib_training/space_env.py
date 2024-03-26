@@ -90,7 +90,7 @@ class SpaceScalEnv(MultiAgentEnv, TaskSettableEnv):
 
     def step(
             self, action_dict: MultiAgentDict
-    ) -> Tuple[MultiAgentDict, MultiAgentDict, MultiAgentDict, MultiAgentDict]:
+    ) -> Tuple[MultiAgentDict, MultiAgentDict, MultiAgentDict, MultiAgentDict, MultiAgentDict]:
         all_agents = []
         for behavior_name in self.unity_env.behavior_specs:
             if self.api_version[0] > 1 or (
@@ -116,22 +116,22 @@ class SpaceScalEnv(MultiAgentEnv, TaskSettableEnv):
                 raise ValueError("Check mlagents|rllib versions")
         self.unity_env.step()
 
-        obs, rewards, dones, infos = self._get_step_results()
+        obs, rewards, dones, truncated, infos = self._get_step_results()
 
         # Global horizon reached? -> Return __all__ done=True, so user
         # can reset. Set all agents' individual `done` to True as well.
         self.episode_timesteps += 1
-        return obs, rewards, dones, infos
+        return obs, rewards, dones, truncated, infos
 
-    def reset(self) -> MultiAgentDict:
+    def reset(self, **kwargs) -> Tuple[MultiAgentDict, MultiAgentDict]:
         # Curriculum
         if self.changes_to_task:
             self.update_and_send_task_to_unity(self.changes_to_task)
         """Resets the entire Unity3D scene (a single multi-agent episode)."""
         self.episode_timesteps = 0
         self.unity_env.reset()
-        obs, _, _, _ = self._get_step_results()
-        return obs
+        obs, _, _, _, infos = self._get_step_results()
+        return obs, infos
 
     def _get_step_results(self):
         """Collects those agents' obs/rewards that have to act in next `step`.
@@ -179,7 +179,7 @@ class SpaceScalEnv(MultiAgentEnv, TaskSettableEnv):
         # Only use dones if all agents are done, then we should do a reset.
         all_done = not (False in list(dones.values()))
         dones["__all__"] = all_done
-        return obs, rewards, dones, infos
+        return obs, rewards, dones, {"__all__": False}, infos
 
     @staticmethod
     def get_policy_configs_for_game(
