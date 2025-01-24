@@ -107,9 +107,12 @@ public class SpaceShipController : Agent
         float qy = actionBuffers.DiscreteActions[4] - 1;
         bool isShoot = actionBuffers.DiscreteActions[5] == 1;
         // Debug.Log("Acts: " + x + "; " + y + "; " + z + "; " + qx + "; " + qy + "; " + isShoot + "; ");
-        movementInput = new Vector3(x, y, z);
-        rotateInput = new Vector2(qx, qy);
-        
+        if (behaviour.BehaviorType != Unity.MLAgents.Policies.BehaviorType.HeuristicOnly)
+        {
+            movementInput = new Vector3(x, y, z);
+            rotateInput = new Vector2(qx, qy);
+        }
+
         if (isShoot)
         {
             OnShoot();
@@ -216,6 +219,11 @@ public class SpaceShipController : Agent
 
     private void Move()
     {
+        if (shipId == 0)
+        {
+            Debug.Log($"Move: {movementInput}");
+        }
+
         // move
         if (movementInput != Vector3.zero)
         {
