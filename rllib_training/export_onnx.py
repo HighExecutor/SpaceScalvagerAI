@@ -16,14 +16,11 @@ from ray.rllib.algorithms.ppo import PPO
 
 from space_env import SpaceScalEnv
 
-# base_dir = "E:\wspace\\rl_tutorial\\rllib_results\\"
-base_dir = "E:\wspace\\rl_tutorial\\rllib_results_nodrag\\"
+base_dir = "checkpoints\\"
 # checkpoint_path = "<exp_series>\\<PPO>\\<run_name>\<checkpoint_xxxxxx>"
-# checkpoint_path = "PPO_2024-03-22_14-19-58\PPO_SpaceScalEnv_e1a3f_00000_0_2024-03-22_14-19-58\checkpoint_000023"
-checkpoint_path = "PPO_2025-02-21_10-09-39\PPO_SpaceScalEnv_94920_00000_0_2025-02-21_10-09-39\checkpoint_000018"
+checkpoint_path = "PPO_2025-02-21_10-09-39\\PPO_SpaceScalEnv_94920_00000_0_2025-02-21_10-09-39\\checkpoint_000028"
 # file_name = None  # specify path if checkpoint is trained on another build
-# file_name = "E:\wspace\\rl_tutorial\\builds\\SpaceScalvager\\SpaceScalvager.exe"
-file_name = "E:\wspace\\rl_tutorial\\builds\\SpaceScalvagerNoDrag\\SpaceScalvager.exe"
+file_name = "..\\builds\\win\\SpaceScalvager.exe"
 
 export_params = True
 opset_version = 9

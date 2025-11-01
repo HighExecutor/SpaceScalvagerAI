@@ -17,17 +17,16 @@ except:
 ray.init(local_mode=True)
 
 env = "SpaceScalEnv"
-# file_name = "E:\wspace\\rl_tutorial\\builds\\SpaceScalvager\\SpaceScalvager.exe"
-file_name = "E:\\wspace\\rl_tutorial\\builds\\SpaceScalvagerNoDrag\\SpaceScalvager.exe"
+file_name = "..\\builds\\win\\SpaceScalvager.exe"
 
 tune.register_env(
     "SpaceScalEnv",
     lambda c: SpaceScalEnv(file_name=c["file_name"], no_graphics=c["no_graphics"]),
 )
 
-base_dir = "E:\wspace\\rl_tutorial\\"
+base_dir = "checkpoints\\"
 # checkpoint_path = "<exp_series>\\<PPO>\\<run_name>\<checkpoint_xxxxxx>"
-checkpoint_path = "rllib_results_nodrag\\PPO_2025-02-21_10-09-39\PPO_SpaceScalEnv_94920_00000_0_2025-02-21_10-09-39\checkpoint_000018"
+checkpoint_path = "PPO_2025-02-21_10-09-39\\PPO_SpaceScalEnv_94920_00000_0_2025-02-21_10-09-39\\checkpoint_000028"
 checkpoint_path = os.path.join(base_dir, checkpoint_path)
 
 exp_config = read_config(checkpoint_path)['config']

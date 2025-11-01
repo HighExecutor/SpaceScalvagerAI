@@ -11,8 +11,7 @@ ray.init(local_mode=local_mode)
 
 args = argparse.Namespace
 args.env = "SpaceScalEnv"
-# args.file_name = "E:\\wspace\\rl_tutorial\\builds\\SpaceScalvager\\SpaceScalvager.exe"
-args.file_name = "E:\\wspace\\rl_tutorial\\builds\\SpaceScalvagerNoDrag\\SpaceScalvager.exe"
+args.file_name = "..\\builds\\win\\SpaceScalvager.exe"
 result_dir = "E:\\wspace\\rl_tutorial\\rllib_results_nodrag\\"
 # args.file_name = None
 args.from_checkpoint = None
@@ -21,7 +20,7 @@ args.stop_timesteps = 999999999
 args.stop_reward = 9999.0
 args.framework = "torch"
 args.num_workers = 4 if not local_mode else 0
-args.no_graphics = True
+args.no_graphics = False
 args.time_scale = 20
 
 policies, policy_mapping_fn = SpaceScalEnv.get_policy_configs_for_game("SpaceScalvager")
@@ -79,7 +78,7 @@ tune.run(
     checkpoint_freq=50,
     checkpoint_at_end=True,
     storage_path=result_dir,
-    restore="E:\wspace\\rl_tutorial\\rllib_results_nodrag\PPO_2025-02-20_21-44-16\PPO_SpaceScalEnv_73ac0_00000_0_2025-02-20_21-44-17\checkpoint_000005"
+    # restore="E:\wspace\\rl_tutorial\\rllib_results_nodrag\PPO_2025-02-20_21-44-16\PPO_SpaceScalEnv_73ac0_00000_0_2025-02-20_21-44-17\checkpoint_000005"
 )
 
 ray.shutdown()
