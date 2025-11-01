@@ -15,3 +15,7 @@ The game:
 https://swingshuffle.itch.io/spacescalvagerai
 
 ![plot](./space_intro.png)
+
+![plot](./game.gif)
+
+![plot](./rllib_training/checkpoints/training_log_screen.png)

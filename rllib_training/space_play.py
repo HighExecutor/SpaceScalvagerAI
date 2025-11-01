@@ -26,7 +26,7 @@ tune.register_env(
 
 base_dir = "checkpoints\\"
 # checkpoint_path = "<exp_series>\\<PPO>\\<run_name>\<checkpoint_xxxxxx>"
-checkpoint_path = "PPO_2025-02-21_10-09-39\\PPO_SpaceScalEnv_94920_00000_0_2025-02-21_10-09-39\\checkpoint_000028"
+checkpoint_path = "PPO_2025-11-01_20-37-16\PPO_SpaceScalEnv_2c1e3_00000_0_2025-11-01_20-37-16\checkpoint_000003"
 checkpoint_path = os.path.join(base_dir, checkpoint_path)
 
 exp_config = read_config(checkpoint_path)['config']

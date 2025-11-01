@@ -78,7 +78,7 @@ tune.run(
     checkpoint_freq=50,
     checkpoint_at_end=True,
     storage_path=result_dir,
-    # restore="E:\wspace\\rl_tutorial\\rllib_results_nodrag\PPO_2025-02-20_21-44-16\PPO_SpaceScalEnv_73ac0_00000_0_2025-02-20_21-44-17\checkpoint_000005"
+    restore="E:\wspace\\rl_tutorial\\rllib_results_nodrag\PPO_2025-02-21_10-09-39\PPO_SpaceScalEnv_94920_00000_0_2025-02-21_10-09-39\checkpoint_000028"
 )
 
 ray.shutdown()

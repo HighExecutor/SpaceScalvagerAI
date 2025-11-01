@@ -237,8 +237,8 @@ public class SpaceShipController : Agent
             {
                 forward.z *= 0.1f;
             }
-            Vector3 left = transform.right * movementInput.x * 0.0f;
-            Vector3 up = transform.up * movementInput.y * 0.0f;
+            Vector3 left = transform.right * movementInput.x * 0.1f;
+            Vector3 up = transform.up * movementInput.y * 0.1f;
             Vector3 moveVector = (forward + left + up);
             rb.AddForce(moveVector * velocity * Time.fixedDeltaTime);
 

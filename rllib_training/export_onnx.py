@@ -18,7 +18,7 @@ from space_env import SpaceScalEnv
 
 base_dir = "checkpoints\\"
 # checkpoint_path = "<exp_series>\\<PPO>\\<run_name>\<checkpoint_xxxxxx>"
-checkpoint_path = "PPO_2025-02-21_10-09-39\\PPO_SpaceScalEnv_94920_00000_0_2025-02-21_10-09-39\\checkpoint_000028"
+checkpoint_path = "PPO_2025-11-01_20-37-16\PPO_SpaceScalEnv_2c1e3_00000_0_2025-11-01_20-37-16\checkpoint_000003"
 # file_name = None  # specify path if checkpoint is trained on another build
 file_name = "..\\builds\\win\\SpaceScalvager.exe"
 
