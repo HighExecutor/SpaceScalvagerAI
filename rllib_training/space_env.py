@@ -193,7 +193,7 @@ class SpaceScalEnv(MultiAgentEnv, TaskSettableEnv):
         }
 
         action_spaces = {
-            "SpaceScalvager": MultiDiscrete([3, 3, 3, 3, 3, 2])
+            "SpaceScalvager": Box(low=-1.0, high=1.0, shape=(6,)),
         }
 
         policies = {

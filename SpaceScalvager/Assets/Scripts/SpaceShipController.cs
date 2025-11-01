@@ -100,12 +100,12 @@ public class SpaceShipController : Agent
     
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-        float x = actionBuffers.DiscreteActions[0] - 1;
-        float y = actionBuffers.DiscreteActions[1] - 1;
-        float z = actionBuffers.DiscreteActions[2] - 1;
-        float qx = actionBuffers.DiscreteActions[3] - 1;
-        float qy = actionBuffers.DiscreteActions[4] - 1;
-        bool isShoot = actionBuffers.DiscreteActions[5] == 1;
+        float x = actionBuffers.ContinuousActions[0];
+        float y = actionBuffers.ContinuousActions[1];
+        float z = actionBuffers.ContinuousActions[2];
+        float qx = actionBuffers.ContinuousActions[3];
+        float qy = actionBuffers.ContinuousActions[4];
+        bool isShoot = actionBuffers.ContinuousActions[5] > 0.1;
         // Debug.Log("Acts: " + x + "; " + y + "; " + z + "; " + qx + "; " + qy + "; " + isShoot + "; ");
         movementInput = new Vector3(x, y, z);
         rotateInput = new Vector2(qx, qy);
@@ -118,20 +118,25 @@ public class SpaceShipController : Agent
 
     public override void Heuristic(in ActionBuffers actionsOut)
     {
-        var discreteActs = actionsOut.DiscreteActions;
-        discreteActs[0] = (int)movementInput.x + 1;
-        discreteActs[1] = (int)movementInput.y + 1;
-        discreteActs[2] = (int)movementInput.z + 1;
-        discreteActs[3] = (int)rotateInput.x + 1;
-        discreteActs[4] = (int)rotateInput.y + 1;
+        var contActs = actionsOut.ContinuousActions;
+        // discreteActs[0] = (int)movementInput.x + 1;
+        // discreteActs[1] = (int)movementInput.y + 1;
+        // discreteActs[2] = (int)movementInput.z + 1;
+        // discreteActs[3] = (int)rotateInput.x + 1;
+        // discreteActs[4] = (int)rotateInput.y + 1;
+        contActs[0] = movementInput.x;
+        contActs[1] = movementInput.y;
+        contActs[2] = movementInput.z;
+        contActs[3] = rotateInput.x;
+        contActs[4] = rotateInput.y;
         // Debug.Log("Acts: " + discreteActs[0] + "; " + discreteActs[1] + "; " + discreteActs[2] + "; " + discreteActs[3] + "; " + discreteActs[4]);
         if (curShootCooldown == shootCooldown)
         {
-            discreteActs[5] = 1;
+            contActs[5] = 1;
         }
         else
         {
-            discreteActs[5] = 0;
+            contActs[5] = 0;
         }
     }
 
@@ -220,8 +225,12 @@ public class SpaceShipController : Agent
         if (movementInput != Vector3.zero)
         {
             Vector3 forward = transform.forward * movementInput.z;
-            Vector3 left = transform.right * movementInput.x;
-            Vector3 up = transform.up * movementInput.y;
+            if (movementInput.z < 0)
+            {
+                forward.z *= 0.1f;
+            }
+            Vector3 left = transform.right * movementInput.x * 0.0f;
+            Vector3 up = transform.up * movementInput.y * 0.0f;
             Vector3 moveVector = (forward + left + up);
             rb.AddForce(moveVector * velocity * Time.fixedDeltaTime);
 
@@ -251,14 +260,17 @@ public class SpaceShipController : Agent
             }
             body.rotation = Quaternion.Euler(body.rotation.eulerAngles.x, body.rotation.eulerAngles.y, bodyAngle);
         }
-        if (movementInput.z > 0 && !parts.isPlaying)
+        if (movementInput.z > 0)
         {
-            parts.Play();
+            if (!parts.isPlaying)
+            {
+                parts.Play();
+            }
         }
         else if (parts.isPlaying)
         {
-            parts.Pause();
-            parts.Clear();
+            parts.Stop();
+            // parts.Clear();
         }
 
         Vector3 curRotation = transform.rotation.eulerAngles;
@@ -274,7 +286,7 @@ public class SpaceShipController : Agent
         {
             float horAngle = curRotation.y + rotateInput.x * angularVelocity * Time.fixedDeltaTime;
             float vertAngle = curRotation.x + rotateInput.y * angularVelocity * Time.fixedDeltaTime;
-            vertAngle = Mathf.Clamp(vertAngle, -45.0f, 45.0f);
+            // vertAngle = Mathf.Clamp(vertAngle, -45.0f, 45.0f);
             float diagAngle = curRotation.z;
             if (diagAngle != 0)
             {

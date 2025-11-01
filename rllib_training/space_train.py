@@ -11,8 +11,9 @@ ray.init(local_mode=local_mode)
 
 args = argparse.Namespace
 args.env = "SpaceScalEnv"
-args.file_name = "E:\\wspace\\rl_tutorial\\builds\\SpaceScalvager\\SpaceScalvager.exe"
-result_dir = "E:\\wspace\\rl_tutorial\\rllib_results\\"
+# args.file_name = "E:\\wspace\\rl_tutorial\\builds\\SpaceScalvager\\SpaceScalvager.exe"
+args.file_name = "E:\\wspace\\rl_tutorial\\builds\\SpaceScalvagerNoDrag\\SpaceScalvager.exe"
+result_dir = "E:\\wspace\\rl_tutorial\\rllib_results_nodrag\\"
 # args.file_name = None
 args.from_checkpoint = None
 args.stop_iters = 999999
@@ -20,7 +21,7 @@ args.stop_timesteps = 999999999
 args.stop_reward = 9999.0
 args.framework = "torch"
 args.num_workers = 4 if not local_mode else 0
-args.no_graphics = False
+args.no_graphics = True
 args.time_scale = 20
 
 policies, policy_mapping_fn = SpaceScalEnv.get_policy_configs_for_game("SpaceScalvager")
@@ -28,7 +29,7 @@ policies, policy_mapping_fn = SpaceScalEnv.get_policy_configs_for_game("SpaceSca
 tune.register_env(
     "SpaceScalEnv",
     lambda c: SpaceScalEnv(file_name=c["file_name"], no_graphics=c["no_graphics"],
-                           curriculum_config=default_task, time_scale=c["time_scale"]),
+                           curriculum_config=curriculum_config, time_scale=c["time_scale"]),
 )
 
 config = (
@@ -39,7 +40,7 @@ config = (
         env_config={"file_name": args.file_name,
                     "no_graphics": args.no_graphics,
                     "time_scale": args.time_scale},
-        # env_task_fn=curriculum_fn
+        env_task_fn=curriculum_fn
     )
     .framework(args.framework)
     .rollouts(
@@ -51,18 +52,18 @@ config = (
         lambda_=0.95,
         gamma=0.99,
         sgd_minibatch_size=512,
-        train_batch_size=4000,
+        train_batch_size=2048*4,
         num_sgd_iter=8,
         vf_loss_coeff=1.0,
         clip_param=0.2,
         entropy_coeff=0.001,
-        model={"fcnet_hiddens": [256, 256],
+        model={"fcnet_hiddens": [64, 64, 64],
                "vf_share_layers": False},
     )
     .multi_agent(policies=policies, policy_mapping_fn=policy_mapping_fn)
     .resources(num_gpus=1)
     .debugging(log_level="INFO")
-    # .callbacks(CurriculumCallback)
+    .callbacks(CurriculumCallback)
 )
 stop = {
     "training_iteration": args.stop_iters,
@@ -78,7 +79,7 @@ tune.run(
     checkpoint_freq=50,
     checkpoint_at_end=True,
     storage_path=result_dir,
-    # restore="checkpoint_path"
+    restore="E:\wspace\\rl_tutorial\\rllib_results_nodrag\PPO_2025-02-20_21-44-16\PPO_SpaceScalEnv_73ac0_00000_0_2025-02-20_21-44-17\checkpoint_000005"
 )
 
 ray.shutdown()

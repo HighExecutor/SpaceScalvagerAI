@@ -8,18 +8,22 @@ from torch import nn
 from ray.rllib.utils.typing import List
 from ray.rllib.policy.policy import Policy
 import numpy as np
-from utils.export_dist_funcs import sample_multicategorical_action_distribution_deterministic
+from utils.export_dist_funcs import sample_multicategorical_action_distribution_deterministic, \
+    sample_diagonal_gaussian_action_distribution
 from utils.config_reader import read_config, read_yaml
 from utils.env_helper import register_envs
 from ray.rllib.algorithms.ppo import PPO
 
 from space_env import SpaceScalEnv
 
-base_dir = "E:\wspace\\rl_tutorial\\rllib_results\\"
+# base_dir = "E:\wspace\\rl_tutorial\\rllib_results\\"
+base_dir = "E:\wspace\\rl_tutorial\\rllib_results_nodrag\\"
 # checkpoint_path = "<exp_series>\\<PPO>\\<run_name>\<checkpoint_xxxxxx>"
-checkpoint_path = "PPO_2024-03-22_14-19-58\PPO_SpaceScalEnv_e1a3f_00000_0_2024-03-22_14-19-58\checkpoint_000023"
+# checkpoint_path = "PPO_2024-03-22_14-19-58\PPO_SpaceScalEnv_e1a3f_00000_0_2024-03-22_14-19-58\checkpoint_000023"
+checkpoint_path = "PPO_2025-02-21_10-09-39\PPO_SpaceScalEnv_94920_00000_0_2025-02-21_10-09-39\checkpoint_000018"
 # file_name = None  # specify path if checkpoint is trained on another build
-file_name = "E:\wspace\\rl_tutorial\\builds\\SpaceScalvager\\SpaceScalvager.exe"
+# file_name = "E:\wspace\\rl_tutorial\\builds\\SpaceScalvager\\SpaceScalvager.exe"
+file_name = "E:\wspace\\rl_tutorial\\builds\\SpaceScalvagerNoDrag\\SpaceScalvager.exe"
 
 export_params = True
 opset_version = 9
@@ -32,11 +36,15 @@ onnx_model_suffix = ".onnx"
 
 policy_spec = SpaceScalEnv.get_policy_configs_for_game(behaviour)[0][behaviour]
 obs_space = policy_spec.observation_space
-discrete_actions = policy_spec.action_space.nvec
+# discrete_actions = policy_spec.action_space.nvec
+n_cont_actions = policy_spec.action_space.shape[0]
 
-input_names = ["obs_0", "obs_1", "action_masks"]
-output_names = ["discrete_actions", "version_number", "memory_size",
-                "discrete_action_output_shape"]
+# input_names = ["obs_0", "obs_1", "action_masks"]
+input_names = ["obs_0", "obs_1"]
+# output_names = ["discrete_actions", "version_number", "memory_size",
+#                 "discrete_action_output_shape"]
+output_names = ["continuous_actions", "version_number", "memory_size",
+                "continuous_action_output_shape"]
 
 
 class RLLibTorchModelWrapper(nn.Module):
@@ -53,16 +61,17 @@ class RLLibTorchModelWrapper(nn.Module):
         self.register_buffer("version_number", torch.Tensor([version_number]).cuda())
         self.version_number: torch.Tensor
 
-
         self.register_buffer("memory_size_vector", torch.Tensor([int(memory_size)]).cuda())
         self.memory_size_vector: torch.Tensor
 
-        self.register_buffer("discrete_act_size_vector", torch.Tensor([discrete_actions]).cuda())
-        self.discrete_act_size_vector: torch.Tensor
+        # self.register_buffer("discrete_act_size_vector", torch.Tensor([discrete_actions]).cuda())
+        # self.discrete_act_size_vector: torch.Tensor
+
+        self.register_buffer("continuous_act_size_vector", torch.Tensor([int(n_cont_actions)]).cuda())
+        self.continuous_act_size_vector: torch.Tensor
 
         # Set modified forward model and action distribution sampler from methods passed in.
         self.action_distribution_sampler = model_action_distribution_sampler
-
 
     def rllib_model_forward(self, inputs: torch.Tensor) -> torch.Tensor:
         """
@@ -87,16 +96,17 @@ class RLLibTorchModelWrapper(nn.Module):
         model_input = torch.concatenate(inputs[0], 1)
         logits = self.rllib_model_forward(model_input)
         # Sample actions from distributions.
-        mask = inputs[1] if len(inputs) > 1 else None
-        sampled_disc = self.action_distribution_sampler(logits, discrete_actions, mask)
+        # mask = inputs[1] if len(inputs) > 1 else None
+        # sampled_disc = self.action_distribution_sampler(logits, discrete_actions, mask)
+        sampled_cont = self.action_distribution_sampler(logits)
 
-        results = [sampled_disc, self.version_number, self.memory_size_vector, self.discrete_act_size_vector]
+        results = [sampled_cont, self.version_number, self.memory_size_vector, self.continuous_act_size_vector]
         return tuple(results)
 
 
-def generate_sample_mask():
-    discrete_size = discrete_actions.sum()
-    return torch.ones([1, discrete_size]).cuda()
+# def generate_sample_mask():
+#     discrete_size = discrete_actions.sum()
+#     return torch.ones([1, discrete_size]).cuda()
 
 
 def get_sample_inputs_from_policy() -> List[torch.Tensor]:
@@ -145,13 +155,16 @@ def export_onnx_model_from_rllib_checkpoint() -> None:
     # Get RLLib policy model from policy.
     model = policy.model
     # Choose sampling method according to action outputs for model
-    sampling_method = sample_multicategorical_action_distribution_deterministic
+    # sampling_method = sample_multicategorical_action_distribution_deterministic
+    sampling_method = sample_diagonal_gaussian_action_distribution
     # Get wrapped model.
     mlagents_model = RLLibTorchModelWrapper(model, sampling_method)
     # Get sample inputs for tracing model.
     sample_obs = get_sample_inputs_from_policy()
-    sample_mask = generate_sample_mask()
-    sample_inputs = (sample_obs, sample_mask)
+    # sample_mask = generate_sample_mask()
+    # sample_inputs = (sample_obs, sample_mask)
+    # Don't need mask when only cont actions
+    sample_inputs = sample_obs
     # Create list of input names, output names, and make the appropriate axes dynamic.
     dynamic_axes = {name: {0: "batch"} for name in input_names}
     dynamic_axes.update({name: {0: "batch"} for name in output_names})
